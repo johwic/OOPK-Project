@@ -8,17 +8,67 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class SocketThread implements Runnable {
+import javax.xml.stream.XMLStreamException;
+
+public class SocketThread {
 	
 	private ArrayList<SocketListener> _listeners = new ArrayList<SocketListener>();	
 	private Socket socket;
+	private final Thread reader;
+	private final Thread writer;
+	private volatile BlockingQueue<Message> msgQueue = new LinkedBlockingQueue<Message>();
 	private volatile boolean isRunning = true;
+	private volatile XMLReader input;
+	private volatile XMLWriter output;
 	
-	public String clientCommand;
+	public Message message;
 
-	public SocketThread(Socket socket) {
-		this.socket = socket;
+	public SocketThread(Socket skt) throws XMLStreamException, IOException {
+		this.socket = skt;
+
+		this.reader = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					input = new XMLReader(new BufferedReader(new InputStreamReader(socket.getInputStream())));
+				} catch (XMLStreamException | IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				while (isRunning) {
+					message = input.readMessage();
+					fireEvent();
+				}
+				
+				return;
+			}
+		});
+		
+		this.writer = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					output = new XMLWriter(new PrintWriter(new OutputStreamWriter(socket.getOutputStream())));
+				} catch (XMLStreamException | IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				while (isRunning) {
+					try {
+						Message m = msgQueue.take();
+						output.writeMessage(m);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				
+				return;
+			}
+		});
 	}
 	
 	public synchronized void addEventListener(SocketListener listener) {
@@ -35,54 +85,21 @@ public class SocketThread implements Runnable {
 		while (i.hasNext()) {
 			(i.next()).handleSocketEvent(event);
 		}
-	}	
-
-	public void terminate() {
-		isRunning = false;
+	}
+	
+	public void start() {
+		reader.start();
+		writer.start();
 	}
 
-	@Override
-	public void run() {
-		// Obtain the input stream and the output stream for the socket
-		// A good practice is to encapsulate them with a BufferedReader
-		// and a PrintWriter as shown below.
-		BufferedReader in = null;
-		PrintWriter out = null;
-
-		// Print out details of this connection
-		System.out.println("Accepted Client Address - "
-				+ socket.getInetAddress().getHostName());
-
-		try {
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-
-			// At this point, we can read for input and reply with appropriate
-			// output.
-
-			// Run in a loop until m_bRunThread is set to false
-			while (isRunning) {
-				// read incoming stream
-				clientCommand = in.readLine();
-				
-				fireEvent();
-				
-				System.out.println("Client Says :" + clientCommand);
-
-				out.println("Server Says : " + clientCommand);
-				out.flush();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				in.close();
-				out.close();
-				socket.close();
-				System.out.println("Socket closed.");
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-			}
-		}
+	public void terminate() throws IOException {
+		isRunning = false;
+		input.close();
+		output.close();
+		socket.close();
+	}
+	
+	public synchronized void send(Message m) {
+		this.msgQueue.add(m);
 	}
 }

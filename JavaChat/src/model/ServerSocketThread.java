@@ -44,9 +44,8 @@ public class ServerSocketThread implements Runnable {
 		try {
 			ssock = new ServerSocket(port);
 		} catch (IOException ioe) {
-			System.out
-					.println("Could not create server socket on port " + port + ". Quitting.");
-			System.exit(-1);
+			System.out.println("Could not create server socket on port " + port + ". Port already in use?");
+			return;
 		}
 		
 		while (isRunning) {

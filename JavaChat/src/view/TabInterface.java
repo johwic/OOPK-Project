@@ -22,15 +22,22 @@ public class TabInterface extends JPanel {
 	 */
 	private static final long serialVersionUID = 3884551684205295307L;
 	
+	private static int count = 0;
+	
 	private final JTextArea messageInput;
 	private final JButton submit;
 	private final JButton reset;
 	private final JTextPane messageWindow;
+	private final int id;
 	
 	public TabInterface() {
+		id = count;
+		count++;
+		
 		messageInput = new JTextArea();
 		messageWindow = new JTextPane();
 		submit = new JButton("Submit");
+		submit.setActionCommand("chat_submit_" + id);
 		reset = new JButton("Reset");
 		
 		JLabel label = new JLabel("Message:");
@@ -44,14 +51,12 @@ public class TabInterface extends JPanel {
 		JScrollPane window = new JScrollPane(messageWindow);
 		
 		messageWindow.setPreferredSize(new Dimension(400, 300));
+		//messageWindow.setSize(400, 300);
 		messageWindow.setEditable(false);
 		messageWindow.setContentType("text/html; charset= UTF-8");
-		
-		//messageWindow.setText("<b>Johan: </b>Hejbhh hhhhhhhhhhhhhh hhhhhhh hhhhhhhhhhh hhhhhhhhhhhh hhhhhhhhhhhhhhhhh hhhhhhhhhh hhhhhhhhhhhhh hhhhhhhhhh hhhhhh hhhhhhhhhh <font color=\"yellow\">då!</font>");
-		
+				
 		//window.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		jScrollPane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		//jScrollPane1.setPreferredSize(new Dimension(256, 256));
 		
         GroupLayout layout = new GroupLayout(this);
         layout.setAutoCreateContainerGaps(true);
@@ -86,17 +91,17 @@ public class TabInterface extends JPanel {
 	}
 	
 	public void addListeners(Controller c) {
-		
+		submit.addActionListener(c);
+	}
+	
+	public int getId() {
+		return id;
 	}
 	
 	public void append(String s) throws BadLocationException, IOException {
 		HTMLDocument doc = (HTMLDocument) messageWindow.getDocument();
 		HTMLEditorKit kit = (HTMLEditorKit) messageWindow.getEditorKit();
-		//doc.insertString(doc.getLength(), s, null);
-		kit.insertHTML(doc, doc.getLength(), s, 0, 0, null);
-	}
-	
-	public JTextPane getMessagePane() {
-		return messageWindow;
+		
+		kit.insertHTML(doc, doc.getLength(), "\n" + s, 0, 0, null);
 	}
 }
