@@ -57,12 +57,10 @@ public class XMLReader implements Closeable {
 	private void addTag(String tag, String value) {
 		switch (tag) {
 		case MESSAGE:
-			System.out.println("message");
 			break;
 
 		case TEXT:
 			message.setText(value);
-			System.out.println("text");
 			break;
 
 		case DISCONNECT:
@@ -83,14 +81,14 @@ public class XMLReader implements Closeable {
 						message = new Message();
 					}
 					
-					Iterator<Attribute> attributes = elem.getAttributes();
+					Iterator<?> attributes = elem.getAttributes();
 					while (attributes.hasNext()) {
-						Attribute attribute = attributes.next();
+						Attribute attribute = (Attribute) attributes.next();
 						addAttribute(elem.getName().getLocalPart(), attribute.getName().getLocalPart(), attribute.getValue());
 					}
 					if (elem.getName().getLocalPart().equals(TEXT)) {
 			            event = reader.nextEvent();
-			            message.setText(event.asCharacters().getData());
+			            addTag(TEXT, event.asCharacters().getData());
 					}
 					break;
 					
@@ -110,7 +108,7 @@ public class XMLReader implements Closeable {
 		} catch (XMLStreamException e) {
 			e.printStackTrace();
 		}
-System.out.println("Here");
+		
 		return message;
 	}
 

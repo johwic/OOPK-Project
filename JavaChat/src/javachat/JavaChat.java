@@ -40,6 +40,7 @@ public class JavaChat {
 		JFrame frame = new JFrame("Java Chat");
 		Model model = new Model();
 		View view = new View(model);
+		@SuppressWarnings("unused")
 		Controller controller = new Controller(model, view);
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
