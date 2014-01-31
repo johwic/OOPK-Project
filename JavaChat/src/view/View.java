@@ -12,6 +12,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
 import controller.Controller;
+import model.Conversation;
 import model.Model;
 
 public class View extends JPanel {
@@ -53,14 +54,6 @@ public class View extends JPanel {
 	        
 //	    setLayout(new GridLayout(0, 1));
 //		setBackground(Color.WHITE);
-//	    add(tabs);
-	    
-		//tabUI = new TabInterface();
-		
-		//tabs.addTab("Chat window 1", tabUI);
-		//tabs.setToolTipText("Chatting with Johan");
-		
-		//tabUI.getMessagePane().setText(model.text);
 	}
 	
 	public void addListeners(Controller c) {
@@ -195,8 +188,8 @@ public class View extends JPanel {
         return panel;
 	}	
 	
-	public void createTabUI(Controller c) {
-		TabInterface tab = new TabInterface();
+	public void createTabUI(Conversation c) {
+		TabInterface tab = new TabInterface(c);
 		
 		tab.addListeners(c);
 		tabs.addTab("Chatting", tab);

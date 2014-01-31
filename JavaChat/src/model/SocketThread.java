@@ -24,9 +24,9 @@ public class SocketThread {
 	private volatile XMLReader input;
 	private volatile XMLWriter output;
 	
-	public Message message;
+	private volatile Message message;
 
-	public SocketThread(Socket skt) throws XMLStreamException, IOException {
+	public SocketThread(Socket skt) {
 		this.socket = skt;
 
 		this.reader = new Thread(new Runnable() {
@@ -35,8 +35,8 @@ public class SocketThread {
 				try {
 					input = new XMLReader(new BufferedReader(new InputStreamReader(socket.getInputStream())));
 				} catch (XMLStreamException | IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
+					return;
 				}
 				
 				while (isRunning) {
@@ -53,20 +53,19 @@ public class SocketThread {
 			public void run() {
 				try {
 					output = new XMLWriter(new PrintWriter(new OutputStreamWriter(socket.getOutputStream())));
-				} catch (XMLStreamException | IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				} catch (XMLStreamException | IOException e) {
+					e.printStackTrace();
+					return;
 				}
-				while (isRunning) {
+				
+				while (true) {
 					try {
 						Message m = msgQueue.take();
 						output.writeMessage(m);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						return;
 					}
 				}
-				
-				return;
 			}
 		});
 	}
@@ -94,6 +93,7 @@ public class SocketThread {
 
 	public void terminate() throws IOException {
 		isRunning = false;
+		writer.interrupt();
 		input.close();
 		output.close();
 		socket.close();
@@ -101,5 +101,14 @@ public class SocketThread {
 	
 	public synchronized void send(Message m) {
 		this.msgQueue.add(m);
+	}
+	
+	public synchronized Message getMessage() {
+		return message;
+	}
+	
+	@Override
+	public String toString() {
+		return socket.getInetAddress().getCanonicalHostName();
 	}
 }

@@ -98,7 +98,7 @@ public class XMLReader implements Closeable {
 					
 				case XMLStreamConstants.END_ELEMENT:
 					EndElement elem1 = event.asEndElement();
-					if ( elem1.getName().getLocalPart().equals(MESSAGE) && reader.peek() ==  null ) {
+					if ( elem1.getName().getLocalPart().equals(MESSAGE) ) {
 						return message;
 					}
 					//addTag(elem1.getName().getLocalPart(), tagContent);

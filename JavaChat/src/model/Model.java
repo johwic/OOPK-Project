@@ -9,19 +9,21 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 public class Model {
-	private final ArrayList<SocketThread> sockets;
+	private final ArrayList<Conversation> conversations;
 	private final Hashtable<String, String> userInput = new Hashtable<String, String>();
 	
+	private ServerSocketThread server;
+	
 	public Model() {
-		sockets = new ArrayList<SocketThread>();
+		conversations = new ArrayList<Conversation>();
 	}
 	
-	public void addSocket(SocketThread socket) {
-		sockets.add(socket);
+	public void addConversation(Conversation c) {
+		conversations.add(c);
 	}
 	
-	public SocketThread getSocket(int id) {
-		return sockets.get(id);
+	public ArrayList<Conversation> getConversations() {
+		return conversations;
 	}
 	
 	public DocumentListener getDocumentListener(String action) {
@@ -72,5 +74,16 @@ public class Model {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public void startServer(ServerSocketThread server) {
+		this.server = server;
+		
+		Thread t = new Thread(server);
+		t.start();
+	}
+	
+	public void stopServer() {
+		server.terminate();
 	}
 }

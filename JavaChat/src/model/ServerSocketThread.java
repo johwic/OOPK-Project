@@ -3,17 +3,17 @@ package model;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 public class ServerSocketThread implements Runnable {
 
 	private ArrayList<ServerSocketListener> _listeners = new ArrayList<ServerSocketListener>();
-	private ServerSocket ssock;
+	private volatile ServerSocket serverSocket;
 	private final int port;
-	private volatile boolean isRunning = true;
 
-	public Socket clientSocket;
+	private Socket socket;
 
 	public ServerSocketThread(int port) {
 		this.port = port;
@@ -35,36 +35,38 @@ public class ServerSocketThread implements Runnable {
 		}
 	}
 
-	public void terminate() {
-		isRunning = false;
+	public synchronized void terminate() {
+		try {
+			serverSocket.close();
+			System.out.println("ServerSocket listening on port " + port + " closed.");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public synchronized Socket getSocket() {
+		return this.socket;
 	}
 
 	@Override
 	public void run() {
 		try {
-			ssock = new ServerSocket(port);
-		} catch (IOException ioe) {
+			serverSocket = new ServerSocket(port);
+		} catch (IOException e) {
 			System.out.println("Could not create server socket on port " + port + ". Port already in use?");
 			return;
 		}
 		
-		while (isRunning) {
+		while (true) {
 			try {
-				clientSocket = ssock.accept();
+				socket = serverSocket.accept();
 				fireEvent();
-			} catch (IOException ioe) {
-				System.out
-						.println("Exception encountered on accept. Ignoring. Stack Trace :");
-				ioe.printStackTrace();
+			} catch (SocketException e) {
+				return;
+			} catch (IOException e) {
+				System.out.println("Exception encountered on accept. Ignoring. Stack Trace :");
+				e.printStackTrace();
 			}
-		}
-
-		try {
-			ssock.close();
-			System.out.println("Server Stopped");
-		} catch (Exception ioe) {
-			System.out.println("Problem stopping server socket");
-			System.exit(-1);
 		}
 	}
 }
