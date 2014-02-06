@@ -40,7 +40,12 @@ public class SocketThread {
 				}
 				
 				while (isRunning) {
-					message = input.readMessage();
+					try {
+						message = input.readMessage();
+					} catch (XMLStreamException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					fireEvent();
 				}
 				

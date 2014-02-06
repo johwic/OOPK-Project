@@ -74,7 +74,7 @@ public class Conversation implements ActionListener, SocketListener {
 	private void insert(Message m) {
 		try {
 			kit.insertHTML(doc, doc.getLength(), m.getText(), 0, 0, null);
-			System.out.println(m.getText());
+			//System.out.println(m.getText());
 		} catch (BadLocationException | IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

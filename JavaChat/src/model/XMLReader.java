@@ -22,16 +22,15 @@ public class XMLReader implements Closeable {
 	private static final String COLOR = "color";
 	
 	private final BufferedReader in;
-	private final XMLEventReader reader;
+	private final XMLInputFactory inputFactory;
 	
 	private Message message;
 	
 	public XMLReader(BufferedReader in) throws XMLStreamException {
 		this.in = in;
 		
-		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		inputFactory = XMLInputFactory.newInstance();
 		inputFactory.setProperty("javax.xml.stream.isCoalescing", true);
-		reader = inputFactory.createXMLEventReader(in);
 	}
 
 	private void addAttribute(String tag, String attribute, String value) {
@@ -69,57 +68,53 @@ public class XMLReader implements Closeable {
 		}	
 	}
 
-	public Message readMessage() {
-		try {
-			while (reader.hasNext()) {
-				XMLEvent event = reader.nextEvent();
-				System.out.println(event.toString());
-				switch (event.getEventType()) {
+	public Message readMessage() throws XMLStreamException {
+		// Create new reader every time, otherwise can't read multiple documents.
+		XMLEventReader reader = inputFactory.createXMLEventReader(this.in);
+		message = new Message();
+		
+		while (reader.hasNext()) {
+			XMLEvent event = reader.nextEvent();
+			
+			switch (event.getEventType()) {
 				case XMLStreamConstants.START_ELEMENT:
 					StartElement elem = event.asStartElement();
 					if (elem.getName().getLocalPart().equals(MESSAGE)) {
 						message = new Message();
 					}
-					
+	
 					Iterator<?> attributes = elem.getAttributes();
 					while (attributes.hasNext()) {
 						Attribute attribute = (Attribute) attributes.next();
 						addAttribute(elem.getName().getLocalPart(), attribute.getName().getLocalPart(), attribute.getValue());
 					}
 					if (elem.getName().getLocalPart().equals(TEXT)) {
-			            event = reader.nextEvent();
-			            addTag(TEXT, event.asCharacters().getData());
+						event = reader.nextEvent();
+						addTag(TEXT, event.asCharacters().getData());
 					}
 					break;
-					
-				//case XMLStreamConstants.CHARACTERS:
-				//	tagContent = event.asCharacters().getData().trim();
-				//	break;
-					
+	
+					//case XMLStreamConstants.CHARACTERS:
+						//	tagContent = event.asCharacters().getData().trim();
+					//	break;
+	
 				case XMLStreamConstants.END_ELEMENT:
 					EndElement elem1 = event.asEndElement();
 					if ( elem1.getName().getLocalPart().equals(MESSAGE) ) {
+						reader.close();
 						return message;
 					}
 					//addTag(elem1.getName().getLocalPart(), tagContent);
 					break;
-				}
 			}
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
 		}
 		
+		reader.close();
 		return message;
 	}
 
 	@Override
 	public void close() throws IOException {
 		in.close();
-		try {
-			reader.close();
-		} catch (XMLStreamException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 }
