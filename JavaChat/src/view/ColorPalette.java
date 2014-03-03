@@ -64,7 +64,6 @@ public class ColorPalette extends JPanel {
 							}
 						},
 						new ActionListener() {
-
 							@Override
 							public void actionPerformed(ActionEvent arg0) {
 								return;

@@ -3,6 +3,8 @@ package view;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -15,6 +17,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import model.Conversation;
 import model.SocketThread;
@@ -25,27 +29,27 @@ public class TabInterface extends JPanel {
 	 */
 	private static final long serialVersionUID = 3884551684205295307L;
 
-	private static int count = 0;
-
 	private final JTextArea messageInput;
 	private final JButton submit;
 	private final JButton reset;
+	private final JButton quit;
 	private final JTextPane messageWindow;
 	private final Conversation conversation;
-	private final int id;
 	private final JColorChooser chooser;
 
+	private String title;
+
 	public TabInterface(Conversation c) {
-		id = count;
-		count++;
 
 		conversation = c;
 
 		messageInput = new JTextArea();
 		messageWindow = new JTextPane();
 		submit = new JButton("Submit");
-		submit.setActionCommand("chat_submit_" + id);
+		submit.setActionCommand("submit");
 		reset = new JButton("Reset");
+		quit = new JButton("Disconnect");
+		quit.setActionCommand("disconnect");
 		chooser = new JColorChooser(Color.BLACK);
 
 		JLabel label = new JLabel("Message:");
@@ -66,7 +70,37 @@ public class TabInterface extends JPanel {
 		messageWindow.setEditable(false);
 		messageWindow.setContentType("text/html; charset= UTF-8");
 		messageWindow.setEditorKit(conversation.getEditorKit());
-		messageWindow.setDocument(conversation.getDocument());		
+		messageWindow.setDocument(conversation.getDocument());
+		
+		submit.addActionListener(conversation);
+		quit.addActionListener(conversation);
+		reset.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				messageInput.setText(null);
+				chooser.setColor(Color.BLACK);
+			}
+		});
+		
+		messageInput.getDocument().addDocumentListener(conversation.getDocumentListener("message_text"));
+		chooser.getSelectionModel().addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				StringBuilder sb = new StringBuilder("#");
+				Color c = chooser.getColor();
+				
+				if (c.getRed() < 16) sb.append('0');
+				sb.append(Integer.toHexString(c.getRed()));
+
+				if (c.getGreen() < 16) sb.append('0');
+				sb.append(Integer.toHexString(c.getGreen()));
+
+				if (c.getBlue() < 16) sb.append('0');
+				sb.append(Integer.toHexString(c.getBlue()));
+				
+			    conversation.setUserInput("text_color", sb.toString());
+			}
+		});
 
 		jScrollPane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
@@ -85,7 +119,8 @@ public class TabInterface extends JPanel {
 								.addComponent(jScrollPane1)
 								.addGroup(layout.createSequentialGroup()
 										.addComponent(submit)
-										.addComponent(reset)))
+										.addComponent(reset)
+										.addComponent(quit)))
 						.addComponent(participantList))
 		);
 
@@ -99,17 +134,14 @@ public class TabInterface extends JPanel {
 								.addComponent(jScrollPane1)
 								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 										.addComponent(submit)
-										.addComponent(reset)))
+										.addComponent(reset)
+										.addComponent(quit)))
 						.addComponent(participantList))
 				);
 	}
 
-	public void addListeners(Conversation c) {
-		submit.addActionListener(c);
-	}
-
-	public int getId() {
-		return id;
+	public String getTitle() {
+		return title;
 	}
 	
 	private class FontfaceButton extends JPanel {

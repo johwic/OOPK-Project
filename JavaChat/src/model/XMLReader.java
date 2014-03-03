@@ -103,6 +103,8 @@ public class XMLReader implements Closeable {
 					if ( elem1.getName().getLocalPart().equals(MESSAGE) ) {
 						reader.close();
 						return message;
+					} else if ( elem1.getName().getLocalPart().equals(DISCONNECT) ) {
+						message.setDisconnect(true);
 					}
 					//addTag(elem1.getName().getLocalPart(), tagContent);
 					break;

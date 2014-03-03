@@ -191,8 +191,7 @@ public class View extends JPanel {
 	public void createTabUI(Conversation c) {
 		TabInterface tab = new TabInterface(c);
 		
-		tab.addListeners(c);
-		tabs.addTab("Chatting", tab);
+		tabs.addTab(tab.getTitle(), tab);
 		tabUI.add(tab);
 	}
 }

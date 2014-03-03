@@ -33,7 +33,7 @@ public class SocketThread {
 			@Override
 			public void run() {
 				try {
-					input = new XMLReader(new BufferedReader(new InputStreamReader(socket.getInputStream())));
+					input = new XMLReader(new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8")));
 				} catch (XMLStreamException | IOException e) {
 					e.printStackTrace();
 					return;
@@ -42,11 +42,10 @@ public class SocketThread {
 				while (isRunning) {
 					try {
 						message = input.readMessage();
+						fireEvent();
 					} catch (XMLStreamException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					fireEvent();
 				}
 				
 				return;
@@ -57,7 +56,7 @@ public class SocketThread {
 			@Override
 			public void run() {
 				try {
-					output = new XMLWriter(new PrintWriter(new OutputStreamWriter(socket.getOutputStream())));
+					output = new XMLWriter(new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8")));
 				} catch (XMLStreamException | IOException e) {
 					e.printStackTrace();
 					return;
@@ -68,7 +67,10 @@ public class SocketThread {
 						Message m = msgQueue.take();
 						output.writeMessage(m);
 					} catch (InterruptedException e) {
+						System.out.println("Writer closed.");
 						return;
+					} catch (XMLStreamException e) {
+						e.printStackTrace();
 					}
 				}
 			}
@@ -96,12 +98,14 @@ public class SocketThread {
 		writer.start();
 	}
 
-	public void terminate() throws IOException {
+	public synchronized void terminate() throws IOException {
 		isRunning = false;
 		writer.interrupt();
 		input.close();
 		output.close();
 		socket.close();
+		
+		System.out.println("Socket " + socket.getInetAddress().toString() + " and streams closed.");
 	}
 	
 	public synchronized void send(Message m) {

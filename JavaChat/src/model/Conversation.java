@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -73,7 +74,16 @@ public class Conversation implements ActionListener, SocketListener {
 	
 	private void insert(Message m) {
 		try {
-			kit.insertHTML(doc, doc.getLength(), m.getText(), 0, 0, null);
+			String s;
+			if ( m.isDisconnect() ) {
+				s = "You disonnected.";
+			} else {
+				s = m.getText().replaceAll("<fetstil>", "<b>");
+			}
+			s.replaceAll("</fetstil>", "</b>");
+			s.replaceAll("<kursiv>", "<i>");
+			s.replaceAll("</kursiv>", "</i>");
+			kit.insertHTML(doc, doc.getLength(),"<b>" + m.getSender() + ": </b><font color=\"" + m.getColor() + "\">" + s + "</font>", 0, 0, null);
 			//System.out.println(m.getText());
 		} catch (BadLocationException | IOException e1) {
 			// TODO Auto-generated catch block
@@ -81,7 +91,7 @@ public class Conversation implements ActionListener, SocketListener {
 		}		
 	}
 	
-	private void setUserInput(String key, String value) {
+	public void setUserInput(String key, String value) {
 		userInput.put(key, value);
 	}
 	
@@ -129,11 +139,39 @@ public class Conversation implements ActionListener, SocketListener {
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		Message m = new Message();
-		m.setSender("Johan");
-		m.setText("Hej! Lorem ipsum dolor sit amet.");
-		
-		send(m);
+		switch(arg0.getActionCommand()) {
+		case "submit":
+			Message m = new Message();
+			m.setSender("Johan");
+			m.setText(userInput.get("message_text"));
+			if ( userInput.containsKey("text_color") ) {
+				m.setColor(userInput.get("text_color") );
+			} else {
+				m.setColor("#000000");
+			}
+			
+			send(m);
+			break;
+		case "disconnect":
+			Message m1 = new Message();
+			m1.setDisconnect(true);
+			m1.setSender("Johan");
+			send(m1);
+			
+			Iterator<SocketThread> itr = participants.iterator();
+			while ( itr.hasNext() ) {
+				SocketThread skt = itr.next();
+				try {
+					skt.terminate();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				itr.remove();
+			}
+			
+			break;
+		}
 	}
 	
 	@Override
@@ -150,7 +188,20 @@ public class Conversation implements ActionListener, SocketListener {
 		SocketThread source = (SocketThread) e.getSource();
 		Message m = source.getMessage();
 		
-		relay(source, m);
-		insert(m);
+		if ( m.isDisconnect() ) {
+			try {
+				remove(source);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			Message message = new Message();
+			message.setSender("Server");
+			message.setText(m.getSender() + " disconnected.");
+			insert(message);
+		} else {
+			relay(source, m);
+			insert(m);
+		}
 	}
 }

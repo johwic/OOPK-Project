@@ -3,45 +3,41 @@ package model;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventFactory;
-import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.Attribute;
+import javax.xml.stream.XMLStreamWriter;
 
 public class XMLWriter implements Closeable {
 	
 	private final PrintWriter out;
-	private final XMLEventWriter writer;
+	private final XMLStreamWriter writer;
 	
 	public XMLWriter(PrintWriter out) throws XMLStreamException {
 		this.out = out;
 		
 		XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-		writer = outputFactory.createXMLEventWriter(this.out);
+		writer = outputFactory.createXMLStreamWriter(this.out);
 	}
 	
-	public void writeMessage(Message m) {
-		XMLEventFactory factory = XMLEventFactory.newInstance();
+	public void writeMessage(Message m) throws XMLStreamException {
+
+		writer.writeStartDocument("UTF-8", "1.0");
+		writer.writeStartElement("message");
+		writer.writeAttribute("sender", m.getSender());
 		
-		try {
-			writer.add(factory.createStartDocument("UTF-8", "1.0"));
-			ArrayList<Attribute> attr = new ArrayList<Attribute>();
-			attr.add(factory.createAttribute("sender", m.getSender()));
-			writer.add(factory.createStartElement(new QName("message"), attr.iterator(), null));
-			writer.add(factory.createStartElement(new QName("text"), null, null));
-			writer.add(factory.createCharacters(m.getText()));
-			writer.add(factory.createEndElement(new QName("text"), null));					
-			writer.add(factory.createEndElement(new QName("message"), null));
-			writer.add(factory.createEndDocument());
-			writer.flush();
-		} catch (XMLStreamException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if ( m.isDisconnect() ) {
+			writer.writeEmptyElement("disconnect");
+		} else {
+			writer.writeStartElement("text");
+			writer.writeAttribute("color", m.getColor());
+			writer.writeCharacters(m.getText());
+			writer.writeEndElement();
 		}
+
+		writer.writeEndElement();
+		writer.writeEndDocument();
+
+		writer.flush();
 	}
 
 	@Override
