@@ -22,6 +22,7 @@ public class JavaChat {
 			public void run() {
 				try {
 				    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                        // Nimbus theme
 				        if ("Nimbus".equals(info.getName())) {
 				            UIManager.setLookAndFeel(info.getClassName());
 				            break;
@@ -37,7 +38,12 @@ public class JavaChat {
 	}
 
 	private static void initGUI() {
+
+        // Main window
+
 		JFrame frame = new JFrame("Java Chat");
+
+        // MVC
 		Model model = new Model();
 		View view = new View(model);
 		@SuppressWarnings("unused")

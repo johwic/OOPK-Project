@@ -3,10 +3,16 @@ package model;
 //import java.util.ArrayList;
 //import java.util.Hashtable;
 
+/**
+ * Contains message text, color, sender.
+ * Disconnect flag makes it a disconnect message.
+ */
 public class Message {
 	private String sender;
 	private String text;
 	private String color;
+
+    // disconnect flag
 	private boolean disconnect;
 	
 	/*public static Hashtable<String, ArrayList<String>> getHashtable() {

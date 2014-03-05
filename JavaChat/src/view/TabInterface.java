@@ -45,6 +45,8 @@ public class TabInterface extends JPanel {
 
 		messageInput = new JTextArea();
 		messageWindow = new JTextPane();
+
+        // buttons
 		submit = new JButton("Submit");
 		submit.setActionCommand("submit");
 		reset = new JButton("Reset");

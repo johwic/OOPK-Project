@@ -21,8 +21,10 @@ public class View extends JPanel {
 	 * 
 	 */
 	private static final long serialVersionUID = 7946965173834172270L;
-	
+
+    // list of tabs
 	private ArrayList<TabInterface> tabUI = new ArrayList<TabInterface>();
+
 	private final Model model;
 	private final JTabbedPane tabs;
 	private final JPanel startPanel;

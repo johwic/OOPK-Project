@@ -14,6 +14,10 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+/**
+ * StAx implementation for XML parsing of messages.
+ * Cursor model.
+ */
 public class XMLReader implements Closeable {
 	private static final String MESSAGE = "message";
 	private static final String TEXT = "text";
