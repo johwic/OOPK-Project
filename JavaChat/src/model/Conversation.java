@@ -116,13 +116,16 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 		try {
 			String s;
 			if ( m.isDisconnect() ) {
-				s = "You disonnected.";
+				s = "You disconnected.";
 			} else {
-				s = m.getText().replaceAll("<fetstil>", "<b>");
+				s = m.getText();
 			}
-			s.replaceAll("</fetstil>", "</b>");
-			s.replaceAll("<kursiv>", "<i>");
-			s.replaceAll("</kursiv>", "</i>");
+			s.replaceAll("<", "&lt;");
+			s.replaceAll(">", "&gt;");
+			s.replaceAll("&lt;fetstil&gt;", "<b>");
+			s.replaceAll("&lt;/fetstil&gt;", "</b>");
+			s.replaceAll("&lt;kursiv&gt;", "<i>");
+			s.replaceAll("&lt;/kursiv&gt;", "</i>");
 			kit.insertHTML(doc, doc.getLength(),"<b>" + m.getSender() + ": </b><font color=\"" + m.getColor() + "\">" + s + "</font>", 0, 0, null);
 			//System.out.println(m.getText());
 		} catch (BadLocationException | IOException e1) {

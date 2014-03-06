@@ -41,8 +41,6 @@ public class Controller implements ServerSocketListener, ActionListener {
 		} else {
 			message = "Connection recieved from " + clientSocket.toString() + ".\n The client has not implemented B1.\n Please choose a conversation to join, or leave blank to close it:";
 		}
-		
-		ArrayList<Conversation> selectionValues = new ArrayList<Conversation>();
 
         // content for dialog
         ArrayList<Conversation> selectionValues = new ArrayList<Conversation>();
@@ -50,7 +48,6 @@ public class Controller implements ServerSocketListener, ActionListener {
 		selectionValues.add(1, new Conversation());
 		selectionValues.addAll(model.getConversations());
 		Conversation conversation = (Conversation) JOptionPane.showInputDialog(view, message, "New socket", JOptionPane.QUESTION_MESSAGE, null, selectionValues.toArray(), null);
-
 
 		if ( conversation != null ) {
 
@@ -62,10 +59,8 @@ public class Controller implements ServerSocketListener, ActionListener {
 				model.addConversation(conversation);
 			}
 			
-
             // pass socket thread to conversation
 			conversation.add(socket);
-
 		} else {
 			Message reply = new Message();
 			if ( requestMessage != null ) {

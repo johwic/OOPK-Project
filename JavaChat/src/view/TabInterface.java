@@ -75,7 +75,8 @@ public class TabInterface extends JPanel {
 
 		JScrollPane window = new JScrollPane(messageWindow);
 		ColorPalette cp = new ColorPalette(chooser);
-		//FontfaceButton cp = new FontfaceButton("B", "<fetstil>", "</fetstil>");
+		FontfaceButton bold = new FontfaceButton("B", "<fetstil>", "</fetstil>");
+		FontfaceButton italics = new FontfaceButton("I", "<kursiv>", "</kursiv>");
 
 		messageWindow.setPreferredSize(new Dimension(400, 300));
 		messageWindow.setEditable(false);
