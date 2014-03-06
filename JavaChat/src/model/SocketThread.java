@@ -14,35 +14,58 @@ import java.util.concurrent.TimeUnit;
 
 import javax.xml.stream.XMLStreamException;
 
+/**
+ * Manages one connection. Sends and receives messages.
+ * Parses XML with StAx.
+ */
 public class SocketThread {
-	
-	private ArrayList<SocketListener> _listeners = new ArrayList<SocketListener>();	
+
+    // registered listeners
+	private ArrayList<SocketListener> _listeners = new ArrayList<SocketListener>();
+
+    // the socket
 	private Socket socket;
+
+    // separate threads for i/o
 	private final Thread reader;
 	private final Thread writer;
+
+    // queue for messages to be sent
 	private volatile BlockingQueue<Message> msgQueue = new LinkedBlockingQueue<Message>();
+
 	private volatile boolean isRunning = true;
+
 	private volatile XMLReader input;
 	private volatile XMLWriter output;
 	
 	private volatile BlockingQueue<Message> messages = new LinkedBlockingQueue<Message>();
 
 	public SocketThread(Socket skt) {
+
+        // contains a socket
 		this.socket = skt;
 
+        // contains a thread that accepts input streams
 		this.reader = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
+
+                    // xml wrapped stream
 					input = new XMLReader(new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8")));
+
 				} catch (XMLStreamException | IOException e) {
+                    // if something went wrong
 					e.printStackTrace();
 					return;
 				}
 				
 				while (isRunning) {
 					try {
+                        // fires an event when a message comes in
+                        // which object has a readMessage() method?
 						messages.put(input.readMessage());
+
 						fireEvent();
 					} catch (InterruptedException e) {
 						System.out.println("Reader closed.");
@@ -56,7 +79,8 @@ public class SocketThread {
 				return;
 			}
 		});
-		
+
+        // contains a thread which sends output streams
 		this.writer = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -81,7 +105,11 @@ public class SocketThread {
 			}
 		});
 	}
-	
+
+    /**
+     * Register listener.
+     * Custom event mechanism for incoming messages.
+     */
 	public synchronized void addEventListener(SocketListener listener) {
 		_listeners.add(listener);
 	}
@@ -90,14 +118,26 @@ public class SocketThread {
 		_listeners.remove(listener);
 	}
 
+    /**
+     * Creates a SocketEvent from this object.
+     * Calls the handleSocketEvent() method in registered listeners.
+     *
+     * Event is empty, it only notifies that there is an incoming message.
+     * Notified entities handle everything.
+     */
 	private synchronized void fireEvent() {
 		SocketEvent event = new SocketEvent(this);
 		Iterator<SocketListener> i = _listeners.iterator();
+
+        // passes event to
 		while (i.hasNext()) {
 			(i.next()).handleSocketEvent(event);
 		}
 	}
-	
+
+    /**
+     * Start reader and writer threads.
+     */
 	public void start() {
 		if ( !reader.isAlive()) {
 			reader.start();
@@ -105,6 +145,9 @@ public class SocketThread {
 		}
 	}
 
+    /**
+     * Interrupts and closes everything.
+     */
 	public synchronized void terminate() throws IOException {
 		isRunning = false;
 		reader.interrupt();

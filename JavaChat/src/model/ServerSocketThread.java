@@ -7,8 +7,13 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+/**
+ * Listens for incoming connections and notifies registered listeners
+ * when a new connection is available.
+ */
 public class ServerSocketThread implements Runnable {
 
+    // list of registered listeners, custom event mechanism
 	private ArrayList<ServerSocketListener> _listeners = new ArrayList<ServerSocketListener>();
 	private volatile ServerSocket serverSocket;
 	private final int port;
@@ -27,6 +32,9 @@ public class ServerSocketThread implements Runnable {
 		_listeners.remove(listener);
 	}
 
+    /**
+     * Calls handleServerSocketEvent() method of all registered listeners.
+     */
 	private synchronized void fireEvent() {
 		ServerSocketEvent event = new ServerSocketEvent(this);
 		Iterator<ServerSocketListener> i = _listeners.iterator();
@@ -35,6 +43,9 @@ public class ServerSocketThread implements Runnable {
 		}
 	}
 
+    /**
+     * Closes server socket.
+     */
 	public synchronized void terminate() {
 		try {
 			serverSocket.close();
@@ -48,6 +59,10 @@ public class ServerSocketThread implements Runnable {
 		return this.socket;
 	}
 
+    /**
+     * Run() method for Runnable().
+     * Creates a server socket, keeps listening and accepting new connections.
+     */
 	@Override
 	public void run() {
 		try {
@@ -56,7 +71,8 @@ public class ServerSocketThread implements Runnable {
 			System.out.println("Could not create server socket on port " + port + ". Port already in use?");
 			return;
 		}
-		
+
+        // keep server socket listening and accepting new connections.
 		while (true) {
 			try {
 				socket = serverSocket.accept();

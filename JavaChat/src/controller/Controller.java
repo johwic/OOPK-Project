@@ -27,7 +27,11 @@ public class Controller implements ServerSocketListener, ActionListener {
 
 	@Override
 	public void handleServerSocketEvent(ServerSocketEvent e) {
+
+        // receive connection
 		Socket clientSocket = ((ServerSocketThread) e.getSource()).getSocket();
+
+        // make a message string
 		SocketThread socket = new SocketThread(clientSocket);
 		socket.start();
 		Message requestMessage = socket.takeMessageTimeout(2000);
@@ -39,19 +43,29 @@ public class Controller implements ServerSocketListener, ActionListener {
 		}
 		
 		ArrayList<Conversation> selectionValues = new ArrayList<Conversation>();
+
+        // content for dialog
+        ArrayList<Conversation> selectionValues = new ArrayList<Conversation>();
 		selectionValues.add(0, null);
 		selectionValues.add(1, new Conversation());
 		selectionValues.addAll(model.getConversations());
 		Conversation conversation = (Conversation) JOptionPane.showInputDialog(view, message, "New socket", JOptionPane.QUESTION_MESSAGE, null, selectionValues.toArray(), null);
-		
+
+
 		if ( conversation != null ) {
-			
+
+            // make a new thread for conversation
+
+            // make a new tab (what is a "new" conversation?)
 			if (conversation.isNew()) {
 				view.createTabUI(conversation);
 				model.addConversation(conversation);
 			}
 			
+
+            // pass socket thread to conversation
 			conversation.add(socket);
+
 		} else {
 			Message reply = new Message();
 			if ( requestMessage != null ) {

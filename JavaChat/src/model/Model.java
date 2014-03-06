@@ -9,6 +9,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 public class Model {
+
+    // list of conversations
 	private final ArrayList<Conversation> conversations;
 	private final Hashtable<String, String> userInput = new Hashtable<String, String>();
 	

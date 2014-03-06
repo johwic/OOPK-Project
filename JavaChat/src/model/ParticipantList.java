@@ -9,7 +9,9 @@ import javax.swing.AbstractListModel;
 public class ParticipantList<E> extends AbstractListModel<E> implements Iterable<E> {
 	
 	/**
-	 * 
+	 * Manages list of active socket threads (active connections).
+     *
+     * add() and remove() fires events
 	 */
 	private static final long serialVersionUID = 8821862783142765860L;
 	
