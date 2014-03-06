@@ -3,11 +3,17 @@ package model;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 
+import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.EditorKit;
@@ -15,12 +21,13 @@ import javax.swing.text.StyledDocument;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 
-public class Conversation implements ActionListener, SocketListener {
+public class Conversation implements ActionListener, ListSelectionListener, SocketListener {
 	private final ParticipantList<SocketThread> participants = new ParticipantList<SocketThread>();
 	private final Hashtable<String, String> userInput = new Hashtable<String, String>();
 	
 	private final HTMLDocument doc;
 	private final HTMLEditorKit kit;
+	private List<SocketThread> selectedParticipants = null;
 	
 	public Conversation() {
 		this.doc = new HTMLDocument();
@@ -139,45 +146,57 @@ public class Conversation implements ActionListener, SocketListener {
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
+		if ( !userInput.containsKey("user_name") ) {
+			JOptionPane.showMessageDialog(null, "Please enter a valid name.", "Invalid input", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		} else if ( userInput.get("user_name").length() < 1) {
+			JOptionPane.showMessageDialog(null, "Please enter a valid name.", "Invalid input", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+		Message m = new Message();
+		
 		switch(arg0.getActionCommand()) {
-		case "submit":
-			Message m = new Message();
-			m.setSender("Johan");
-			m.setText(userInput.get("message_text"));
-			if ( userInput.containsKey("text_color") ) {
-				m.setColor(userInput.get("text_color") );
-			} else {
-				m.setColor("#000000");
-			}
-			
-			send(m);
-			break;
-		case "disconnect":
-			Message m1 = new Message();
-			m1.setDisconnect(true);
-			m1.setSender("Johan");
-			send(m1);
-			
-			Iterator<SocketThread> itr = participants.iterator();
-			while ( itr.hasNext() ) {
-				SocketThread skt = itr.next();
-				try {
-					skt.terminate();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			case "submit":
+				if ( !userInput.containsKey("message_text") ) {
+					JOptionPane.showMessageDialog(null, "Please enter a valid message.", "Invalid input", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				} else if ( userInput.get("message_text").length() < 1) {
+					JOptionPane.showMessageDialog(null, "Please enter a valid message.", "Invalid input", JOptionPane.INFORMATION_MESSAGE);
+					return;
 				}
-				itr.remove();
-			}
-			
-			break;
+				m.setSender(userInput.get("user_name"));
+				m.setText(userInput.get("message_text"));
+				if ( userInput.containsKey("text_color") ) {
+					m.setColor(userInput.get("text_color") );
+				} else {
+					m.setColor("#000000");
+				}
+				
+				send(m);
+				break;
+			case "disconnect":
+				m.setDisconnect(true);
+				m.setSender(userInput.get("user_name"));
+				
+				for ( SocketThread skt : selectedParticipants ) {
+					try {
+						skt.send(m);
+						skt.terminate();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				participants.removeAll(selectedParticipants);
+				break;
 		}
 	}
 	
 	@Override
 	public String toString() {
 		if ( participants.isEmpty() ) {
-			return "New conversation";
+			return "Empty conversation";
 		}
 		
 		return "Conversation 1";
@@ -198,10 +217,48 @@ public class Conversation implements ActionListener, SocketListener {
 			Message message = new Message();
 			message.setSender("Server");
 			message.setText(m.getSender() + " disconnected.");
+			message.setColor("#000000");
+			send(message);
+		} else if ( m.getRequestReply() != null ) {
+			try {
+				remove(source);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			Message message = new Message();
+			message.setSender("Server");
+			message.setText(m.getSender() + " declined connection. Message: " + m.getRequestMessage());
+			message.setColor("#000000");
 			insert(message);
 		} else {
 			relay(source, m);
 			insert(m);
 		}
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent arg0) {
+		JList<SocketThread> src = (JList<SocketThread>) arg0.getSource();
+		
+		selectedParticipants  = src.getSelectedValuesList();
+	}
+	
+	public void diconnectAll() {
+		Message m = new Message();
+		m.setDisconnect(true);
+		m.setSender(userInput.get("user_name"));
+		
+		for ( SocketThread skt : participants ) {
+			try {
+				skt.send(m);
+				skt.terminate();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		//participants.removeAll(participants);
 	}
 }

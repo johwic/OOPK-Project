@@ -20,6 +20,8 @@ public class XMLReader implements Closeable {
 	private static final String SENDER = "sender";
 	private static final String DISCONNECT = "disconnect";
 	private static final String COLOR = "color";
+	private static final String REQUEST = "request";
+	private static final String REPLY = "reply";
 	
 	private final BufferedReader in;
 	private final XMLInputFactory inputFactory;
@@ -50,7 +52,15 @@ public class XMLReader implements Closeable {
 				break;
 			}
 			break;
-		}
+			
+		case REQUEST:
+			switch (attribute) {
+			case REPLY:
+				message.setRequestReply(value);
+				break;
+			}
+			break;
+		}		
 	}
 
 	private void addTag(String tag, String value) {
@@ -64,6 +74,10 @@ public class XMLReader implements Closeable {
 
 		case DISCONNECT:
 			message.setDisconnect(true);
+			break;
+			
+		case REQUEST:
+			message.setRequestMessage(value);
 			break;
 		}	
 	}
@@ -92,6 +106,10 @@ public class XMLReader implements Closeable {
 						event = reader.nextEvent();
 						addTag(TEXT, event.asCharacters().getData());
 					}
+					if (elem.getName().getLocalPart().equals(REQUEST)) {
+						event = reader.nextEvent();
+						addTag(REQUEST, event.asCharacters().getData());
+					}					
 					break;
 	
 					//case XMLStreamConstants.CHARACTERS:

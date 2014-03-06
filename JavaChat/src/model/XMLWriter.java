@@ -27,9 +27,18 @@ public class XMLWriter implements Closeable {
 		
 		if ( m.isDisconnect() ) {
 			writer.writeEmptyElement("disconnect");
+		} else if ( m.getRequestMessage() != null ) {
+			writer.writeStartElement("request");
+			if ( m.getRequestReply() != null) {
+				writer.writeAttribute("reply", m.getRequestReply());
+			}
+			writer.writeCharacters(m.getRequestMessage());
+			writer.writeEndElement();
 		} else {
 			writer.writeStartElement("text");
-			writer.writeAttribute("color", m.getColor());
+			if ( m.getColor() != null ) {
+				writer.writeAttribute("color", m.getColor());
+			}
 			writer.writeCharacters(m.getText());
 			writer.writeEndElement();
 		}

@@ -62,7 +62,7 @@ public class View extends JPanel {
 		serverSubmit.addActionListener(c);
 		
 		socketIpField.getDocument().addDocumentListener(model.getDocumentListener("socket_ip"));
-		socketNameField.getDocument().addDocumentListener(model.getDocumentListener("socket_name"));
+		socketNameField.getDocument().addDocumentListener(model.getDocumentListener("request_name"));
 		socketPortField.getDocument().addDocumentListener(model.getDocumentListener("socket_port"));
 		socketSubmit.addActionListener(c);
 	}
@@ -156,7 +156,7 @@ public class View extends JPanel {
         socketNameField = new JTextField(10);
         socketSubmit = new JButton("Connect");
         
-        socketSubmit.setActionCommand("socket_controller"); 
+        socketSubmit.setActionCommand("socket_controller");
 		
         layout.setHorizontalGroup(
         	layout.createSequentialGroup()

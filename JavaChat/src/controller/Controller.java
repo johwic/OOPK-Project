@@ -28,34 +28,46 @@ public class Controller implements ServerSocketListener, ActionListener {
 	@Override
 	public void handleServerSocketEvent(ServerSocketEvent e) {
 		Socket clientSocket = ((ServerSocketThread) e.getSource()).getSocket();
-		String message = "Connection recieved from " + clientSocket.toString() + ".\n Please choose a conversation to join, or leave blank to close it:";
-		ArrayList<Conversation> selectionValues = new ArrayList<Conversation>();
+		SocketThread socket = new SocketThread(clientSocket);
+		socket.start();
+		Message requestMessage = socket.takeMessageTimeout(2000);
+		String message = null;
+		if (requestMessage != null) {
+			message = "Connection recieved from " + clientSocket.toString() + ".\n Sender: " + requestMessage.getSender() + "\n Message: " + requestMessage.getRequestMessage() + "\n Please choose a conversation to join, or leave blank to close it:";
+		} else {
+			message = "Connection recieved from " + clientSocket.toString() + ".\n The client has not implemented B1.\n Please choose a conversation to join, or leave blank to close it:";
+		}
 		
+		ArrayList<Conversation> selectionValues = new ArrayList<Conversation>();
 		selectionValues.add(0, null);
 		selectionValues.add(1, new Conversation());
 		selectionValues.addAll(model.getConversations());
 		Conversation conversation = (Conversation) JOptionPane.showInputDialog(view, message, "New socket", JOptionPane.QUESTION_MESSAGE, null, selectionValues.toArray(), null);
 		
 		if ( conversation != null ) {
-			SocketThread socket = new SocketThread(clientSocket);
 			
 			if (conversation.isNew()) {
 				view.createTabUI(conversation);
 				model.addConversation(conversation);
 			}
+			
 			conversation.add(socket);
 		} else {
-			conversation = new Conversation();
-			SocketThread socket = null;
-			socket = new SocketThread(clientSocket);
-			//socket.addEventListener(this);
-			//socket.start();
-			
-			if (conversation.isNew()) {
-				view.createTabUI(conversation);
-				model.addConversation(conversation);
+			Message reply = new Message();
+			if ( requestMessage != null ) {
+				reply.setRequestReply("no");
+				reply.setRequestMessage("bas");
+			} else {
+				reply.setText("bas");
 			}
-			conversation.add(socket);
+			reply.setSender("Johan");
+			
+			socket.send(reply);
+			try {
+				socket.terminate();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 		}
 	}
 
@@ -98,9 +110,13 @@ public class Controller implements ServerSocketListener, ActionListener {
 				try {
 					Conversation conversation = new Conversation();
 					SocketThread socket = new SocketThread(new Socket(model.getUserInput("socket_ip"), sport));
-					//socket.addEventListener(this);
-					//socket.start();
+					
 					conversation.add(socket);
+					Message m = new Message();
+					m.setRequestMessage("Hej");//model.getUserInput("request_message"));
+					m.setSender(model.getUserInput("request_name"));
+					// send request message
+					socket.send(m);
 					
 					view.createTabUI(conversation);
 					model.addConversation(conversation);

@@ -7,6 +7,8 @@ public class Message {
 	private String sender;
 	private String text;
 	private String color;
+	private String requestMessage;
+	private String requestReply;
 	private boolean disconnect;
 	
 	/*public static Hashtable<String, ArrayList<String>> getHashtable() {
@@ -52,6 +54,22 @@ public class Message {
 		this.disconnect = disconnect;
 	}
 	
+	public String getRequestMessage() {
+		return requestMessage;
+	}
+
+	public void setRequestMessage(String requestMessage) {
+		this.requestMessage = requestMessage;
+	}
+
+	public String getRequestReply() {
+		return requestReply;
+	}
+
+	public void setRequestReply(String requestReply) {
+		this.requestReply = requestReply;
+	}
+
 	@Override
 	public String toString() {
 		return text;

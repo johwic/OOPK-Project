@@ -16,6 +16,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -51,11 +52,19 @@ public class TabInterface extends JPanel {
 		quit = new JButton("Disconnect");
 		quit.setActionCommand("disconnect");
 		chooser = new JColorChooser(Color.BLACK);
+		
+		JTextField userName = new JTextField(10);
+		userName.getDocument().addDocumentListener(conversation.getDocumentListener("user_name"));
 
 		JLabel label = new JLabel("Message:");
 		label.setFont(new Font(label.getFont().getName(), Font.BOLD, 14));
+		
+		JLabel nameLabel = new JLabel("Name:");
+		nameLabel.setFont(new Font(nameLabel.getFont().getName(), Font.BOLD, 14));
+		
 		JScrollPane jScrollPane1 = new JScrollPane(messageInput);
 		JList<SocketThread> participantList = new JList<SocketThread>(conversation.getParticipants());
+		participantList.addListSelectionListener(conversation);
 
 		messageInput.setLineWrap(true);
 		messageInput.setWrapStyleWord(true);
@@ -113,9 +122,11 @@ public class TabInterface extends JPanel {
 				.addComponent(window)
 				.addGroup(layout.createSequentialGroup()
 						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+								.addComponent(nameLabel)
 								.addComponent(label)
 								.addComponent(cp))
 						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+								.addComponent(userName)
 								.addComponent(jScrollPane1)
 								.addGroup(layout.createSequentialGroup()
 										.addComponent(submit)
@@ -128,9 +139,11 @@ public class TabInterface extends JPanel {
 				.addComponent(window)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 						.addGroup(layout.createSequentialGroup()
+								.addComponent(nameLabel)
 								.addComponent(label)
 								.addComponent(cp))
 						.addGroup(layout.createSequentialGroup()
+								.addComponent(userName)
 								.addComponent(jScrollPane1)
 								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
 										.addComponent(submit)

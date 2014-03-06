@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -24,7 +25,7 @@ public class SocketThread {
 	private volatile XMLReader input;
 	private volatile XMLWriter output;
 	
-	private volatile Message message;
+	private volatile BlockingQueue<Message> messages = new LinkedBlockingQueue<Message>();
 
 	public SocketThread(Socket skt) {
 		this.socket = skt;
@@ -41,10 +42,14 @@ public class SocketThread {
 				
 				while (isRunning) {
 					try {
-						message = input.readMessage();
+						messages.put(input.readMessage());
 						fireEvent();
+					} catch (InterruptedException e) {
+						System.out.println("Reader closed.");
+						return;
 					} catch (XMLStreamException e) {
 						e.printStackTrace();
+						return;
 					}
 				}
 				
@@ -94,12 +99,15 @@ public class SocketThread {
 	}
 	
 	public void start() {
-		reader.start();
-		writer.start();
+		if ( !reader.isAlive()) {
+			reader.start();
+			writer.start();
+		}
 	}
 
 	public synchronized void terminate() throws IOException {
 		isRunning = false;
+		reader.interrupt();
 		writer.interrupt();
 		input.close();
 		output.close();
@@ -113,8 +121,22 @@ public class SocketThread {
 	}
 	
 	public synchronized Message getMessage() {
-		return message;
+		try {
+			return messages.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
+	
+	public synchronized Message takeMessageTimeout(int timeout) {
+		try {
+			return messages.poll(timeout, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}	
 	
 	@Override
 	public String toString() {
