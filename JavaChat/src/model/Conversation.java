@@ -120,13 +120,17 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 			} else {
 				s = m.getText();
 			}
-			s.replaceAll("<", "&lt;");
-			s.replaceAll(">", "&gt;");
-			s.replaceAll("&lt;fetstil&gt;", "<b>");
-			s.replaceAll("&lt;/fetstil&gt;", "</b>");
-			s.replaceAll("&lt;kursiv&gt;", "<i>");
-			s.replaceAll("&lt;/kursiv&gt;", "</i>");
-			kit.insertHTML(doc, doc.getLength(),"<b>" + m.getSender() + ": </b><font color=\"" + m.getColor() + "\">" + s + "</font>", 0, 0, null);
+			System.out.println(s);
+			s = s.replaceAll("&", "&amp;");			
+			s = s.replaceAll("<", "&lt;");
+			s = s.replaceAll(">", "&gt;");
+			System.out.println(s);
+			s = s.replaceAll("&lt;fetstil&gt;", "<b>");
+			s = s.replaceAll("&lt;/fetstil&gt;", "</b>");
+			s = s.replaceAll("&lt;kursiv&gt;", "<i>");
+			s = s.replaceAll("&lt;/kursiv&gt;", "</i>");
+			System.out.println(s);
+			kit.insertHTML(doc, doc.getLength(),"<pre><b>" + m.getSender() + ": </b><font color=\"" + m.getColor() + "\">" + s + "</font></pre>", 0, 0, null);
 			//System.out.println(m.getText());
 		} catch (BadLocationException | IOException e1) {
 			// TODO Auto-generated catch block
