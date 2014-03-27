@@ -30,6 +30,7 @@ public class XMLReader implements Closeable {
 	private final BufferedReader in;
 	private final XMLInputFactory inputFactory;
 	
+	private XMLEventReader reader;
 	private Message message;
 	
 	public XMLReader(BufferedReader in) throws XMLStreamException {
@@ -88,7 +89,7 @@ public class XMLReader implements Closeable {
 
 	public Message readMessage() throws XMLStreamException {
 		// Create new reader every time, otherwise can't read multiple documents.
-		XMLEventReader reader = inputFactory.createXMLEventReader(this.in);
+		reader = inputFactory.createXMLEventReader(this.in);
 		message = new Message();
 		
 		while (reader.hasNext()) {
@@ -139,6 +140,11 @@ public class XMLReader implements Closeable {
 
 	@Override
 	public void close() throws IOException {
+		try {
+			reader.close();
+		} catch (XMLStreamException e) {
+			e.printStackTrace();
+		}
 		in.close();
 	}
 }

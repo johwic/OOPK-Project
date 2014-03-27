@@ -51,9 +51,9 @@ public class XMLWriter implements Closeable {
 
 	@Override
 	public void close() throws IOException {
-		out.close();
 		try {
 			writer.close();
+			out.close();
 		} catch (XMLStreamException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

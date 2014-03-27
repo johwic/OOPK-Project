@@ -46,8 +46,9 @@ public class JavaChat {
         // MVC
 		Model model = new Model();
 		View view = new View(model);
-		@SuppressWarnings("unused")
 		Controller controller = new Controller(model, view);
+		
+		frame.addWindowListener(controller);
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setPreferredSize(new Dimension(800, 600));

@@ -34,8 +34,6 @@ public class SocketThread {
     // queue for messages to be sent
 	private volatile BlockingQueue<Message> msgQueue = new LinkedBlockingQueue<Message>();
 
-	private volatile boolean isRunning = true;
-
 	private volatile XMLReader input;
 	private volatile XMLWriter output;
 	
@@ -51,33 +49,30 @@ public class SocketThread {
 			@Override
 			public void run() {
 				try {
-
                     // xml wrapped stream
 					input = new XMLReader(new BufferedReader(new InputStreamReader(socket.getInputStream(), "UTF-8")));
-
 				} catch (XMLStreamException | IOException e) {
                     // if something went wrong
 					e.printStackTrace();
 					return;
 				}
 				
-				while (isRunning) {
+				while (true) {
 					try {
                         // fires an event when a message comes in
                         // which object has a readMessage() method?
-						messages.put(input.readMessage());
+						messages.add(input.readMessage());
 
 						fireEvent();
-					} catch (InterruptedException e) {
-						System.out.println("Reader closed.");
-						return;
 					} catch (XMLStreamException e) {
-						e.printStackTrace();
-						return;
+						if ( Thread.interrupted() ) {
+							System.out.println("Reader closed.");
+							return;
+						} else {
+							e.printStackTrace();
+						}
 					}
 				}
-				
-				return;
 			}
 		});
 
@@ -150,7 +145,6 @@ public class SocketThread {
      * Interrupts and closes everything.
      */
 	public synchronized void terminate() throws IOException {
-		isRunning = false;
 		reader.interrupt();
 		writer.interrupt();
 		input.close();

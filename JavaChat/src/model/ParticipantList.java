@@ -37,6 +37,15 @@ public class ParticipantList<E> extends AbstractListModel<E> implements Iterable
 		fireContentsChanged(this, i, i);
 	}
 	
+	public boolean removeAll() {
+		if ( !participants.isEmpty() ) {
+			int i = participants.size() - 1;
+			participants.clear();
+			fireIntervalRemoved(this, 0, i);
+		}
+		return true;
+	}	
+	
 	public boolean removeAll(Iterable<E> c) {
 		for ( E o : c) {
 			remove(o);

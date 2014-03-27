@@ -2,6 +2,8 @@ package controller;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -12,7 +14,7 @@ import javax.swing.JOptionPane;
 import model.*;
 import view.*;
 
-public class Controller implements ServerSocketListener, ActionListener {
+public class Controller implements ServerSocketListener, ActionListener, WindowListener {
 	
 	private final View view;
 	private final Model model;
@@ -170,5 +172,45 @@ public class Controller implements ServerSocketListener, ActionListener {
 				}
 				break;
 		}	
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+		return;
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+		return;
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		ArrayList<Conversation> conv = model.getConversations();
+		for ( Conversation c : conv ) {
+			c.disconnectAll();
+		}
+		
+		return;
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		return;
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		return;
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+		return;
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+		return;
 	}
 }

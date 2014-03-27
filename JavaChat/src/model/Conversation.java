@@ -346,6 +346,6 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 			}
 		}
 		
-		participants.removeAll(participants);
+		participants.removeAll();
 	}
 }
