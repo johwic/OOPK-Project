@@ -19,7 +19,8 @@ public class ServerSocketThread implements Runnable {
 	private final int port;
 
 	private Socket socket;
-
+	private String name;
+	
 	public ServerSocketThread(int port) {
 		this.port = port;
 	}
@@ -85,4 +86,12 @@ public class ServerSocketThread implements Runnable {
 			}
 		}
 	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return name;
+	}	
 }

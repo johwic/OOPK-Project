@@ -3,7 +3,6 @@ package model;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -120,21 +119,16 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 			} else {
 				s = m.getText();
 			}
-			System.out.println(s);
 			s = s.replaceAll("&", "&amp;");			
 			s = s.replaceAll("<", "&lt;");
 			s = s.replaceAll(">", "&gt;");
-			System.out.println(s);
 			s = s.replaceAll("&lt;fetstil&gt;", "<b>");
 			s = s.replaceAll("&lt;/fetstil&gt;", "</b>");
 			s = s.replaceAll("&lt;kursiv&gt;", "<i>");
 			s = s.replaceAll("&lt;/kursiv&gt;", "</i>");
-			System.out.println(s);
 			kit.insertHTML(doc, doc.getLength(),"<pre><b>" + m.getSender() + ": </b><font color=\"" + m.getColor() + "\">" + s + "</font></pre>", 0, 0, null);
-			//System.out.println(m.getText());
-		} catch (BadLocationException | IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (BadLocationException | IOException e) {
+			e.printStackTrace();
 		}		
 	}
 	
@@ -178,7 +172,6 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 			try {
 				setUserInput(actionCommand, document.getText(0, document.getLength()));
 			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -190,7 +183,6 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 			try {
 				setUserInput(actionCommand, document.getText(0, document.getLength()));
 			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -245,7 +237,6 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 						skt.send(m);
 						skt.terminate();
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -259,9 +250,21 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 	public String toString() {
 		if ( participants.isEmpty() ) {
 			return "Empty conversation";
+		} else {
+			String s = "Chatting with ";
+			Iterator<SocketThread> itr = participants.iterator();
+			s = s + itr.next().toString();
+			while ( itr.hasNext() ) {
+				SocketThread skt = itr.next();
+				if ( !itr.hasNext() ) {
+					s = s + " and " + skt.toString();
+				} else {
+					s = s + ", " + skt.toString();
+				}
+			}
+			
+			return s;
 		}
-		
-		return "Conversation 1";
 	}
 
     /**
@@ -276,13 +279,16 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
         // get incoming message from one of the participants
 		SocketThread source = (SocketThread) e.getSource();
 		Message m = source.getMessage();
-
+		
+		if ( !m.getSender().equals(source.getName()) ) {
+			source.setName(m.getSender());
+			participants.elementChanged(source);
+		}
         // if a disconnect message, remove participoant
 		if ( m.isDisconnect() ) {
 			try {
 				remove(source);
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 
@@ -296,7 +302,6 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 			try {
 				remove(source);
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			Message message = new Message();
@@ -319,7 +324,7 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 		selectedParticipants  = src.getSelectedValuesList();
 	}
 	
-	public void diconnectAll() {
+	public void disconnectAll() {
 		Message m = new Message();
 		m.setDisconnect(true);
 		m.setSender(userInput.get("user_name"));
@@ -329,11 +334,10 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 				skt.send(m);
 				skt.terminate();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
 		
-		//participants.removeAll(participants);
+		participants.removeAll(participants);
 	}
 }

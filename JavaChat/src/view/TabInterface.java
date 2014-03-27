@@ -20,6 +20,7 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.BadLocationException;
 
 import model.Conversation;
 import model.SocketThread;
@@ -40,10 +41,11 @@ public class TabInterface extends JPanel {
 
 	private String title;
 
-	public TabInterface(Conversation c) {
+	public TabInterface(Conversation c, String name) {
 
 		conversation = c;
-
+		title = c.toString();
+		
 		messageInput = new JTextArea();
 		messageWindow = new JTextPane();
 
@@ -58,6 +60,11 @@ public class TabInterface extends JPanel {
 		JTextField userName = new JTextField(10);
 		userName.getDocument().addDocumentListener(conversation.getDocumentListener("user_name"));
 
+		try {
+			userName.getDocument().insertString(0, name, null);
+		} catch (BadLocationException e1) {
+			e1.printStackTrace();
+		}
 		JLabel label = new JLabel("Message:");
 		label.setFont(new Font(label.getFont().getName(), Font.BOLD, 14));
 		
@@ -180,4 +187,5 @@ public class TabInterface extends JPanel {
 			});
 		}
 	}
+
 }

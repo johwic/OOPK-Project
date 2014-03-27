@@ -36,6 +36,7 @@ public class View extends JPanel {
 	private static JTextField socketIpField;
 	private static JTextField socketNameField;
 	private static JTextField socketPortField;
+	private static JTextField socketMessageField;
 	private static JButton socketSubmit;
 	
 	public View(Model model) {
@@ -65,6 +66,7 @@ public class View extends JPanel {
 		
 		socketIpField.getDocument().addDocumentListener(model.getDocumentListener("socket_ip"));
 		socketNameField.getDocument().addDocumentListener(model.getDocumentListener("request_name"));
+		socketMessageField.getDocument().addDocumentListener(model.getDocumentListener("request_message"));
 		socketPortField.getDocument().addDocumentListener(model.getDocumentListener("socket_port"));
 		socketSubmit.addActionListener(c);
 	}
@@ -152,10 +154,12 @@ public class View extends JPanel {
 		JLabel ip = new JLabel("Server IP:");
         JLabel port = new JLabel("Port number:");
         JLabel name = new JLabel("Name:");
+        JLabel messageLabel = new JLabel("Message (optional):");
         
         socketIpField = new JTextField(10);
         socketPortField = new JTextField(10);
         socketNameField = new JTextField(10);
+        socketMessageField = new JTextField(10);
         socketSubmit = new JButton("Connect");
         
         socketSubmit.setActionCommand("socket_controller");
@@ -165,11 +169,13 @@ public class View extends JPanel {
         		.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
         				.addComponent(ip)
         				.addComponent(port)
-        				.addComponent(name))
+        				.addComponent(name)
+        				.addComponent(messageLabel))
         		.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
         				.addComponent(socketIpField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         				.addComponent(socketPortField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         				.addComponent(socketNameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        				.addComponent(socketMessageField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         				.addComponent(socketSubmit))
         );
         layout.setVerticalGroup(
@@ -183,6 +189,9 @@ public class View extends JPanel {
         		.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
         				.addComponent(name)
         				.addComponent(socketNameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        		.addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        				.addComponent(messageLabel)
+        				.addComponent(socketMessageField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))        				
         		.addComponent(socketSubmit)
         );		
         
@@ -190,9 +199,8 @@ public class View extends JPanel {
         return panel;
 	}	
 	
-	public void createTabUI(Conversation c) {
-		TabInterface tab = new TabInterface(c);
-		
+	public void createTabUI(Conversation c, String name) {
+		TabInterface tab = new TabInterface(c, name);
 		tabs.addTab(tab.getTitle(), tab);
 		tabUI.add(tab);
 	}

@@ -1,7 +1,6 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 
 import javax.swing.AbstractListModel;
@@ -24,15 +23,21 @@ public class ParticipantList<E> extends AbstractListModel<E> implements Iterable
 		return true;
 	}
 	
-	public boolean remove(Object o) {
-		int i = participants.indexOf(o);
-		participants.remove(o);
+	public boolean remove(E e) {
+		int i = participants.indexOf(e);
+		participants.remove(e);
 		fireIntervalRemoved(this, i, i);
 		
 		return true;
 	}
 	
-	public boolean removeAll(Collection<E> c) {
+	public void elementChanged(E e) {
+		int i = participants.indexOf(e);
+		
+		fireContentsChanged(this, i, i);
+	}
+	
+	public boolean removeAll(Iterable<E> c) {
 		for ( E o : c) {
 			remove(o);
 		}

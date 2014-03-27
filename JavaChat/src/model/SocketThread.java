@@ -25,6 +25,7 @@ public class SocketThread {
 
     // the socket
 	private Socket socket;
+	private String name = null;
 
     // separate threads for i/o
 	private final Thread reader;
@@ -179,10 +180,22 @@ public class SocketThread {
 			e.printStackTrace();
 			return null;
 		}
-	}	
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return name;
+	}
 	
 	@Override
 	public String toString() {
-		return socket.getInetAddress().getCanonicalHostName();
+		if ( name != null ) {
+			return name;
+		} else {
+			return socket.getInetAddress().getCanonicalHostName();
+		}
 	}
 }
