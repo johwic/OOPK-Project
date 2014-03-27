@@ -21,6 +21,7 @@ import javax.swing.JTextPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultCaret;
 
 import model.Conversation;
 import model.SocketThread;
@@ -48,6 +49,8 @@ public class TabInterface extends JPanel {
 		
 		messageInput = new JTextArea();
 		messageWindow = new JTextPane();
+		DefaultCaret caret = (DefaultCaret) messageWindow.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 
         // buttons
 		submit = new JButton("Submit");
