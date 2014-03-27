@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -111,25 +112,31 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
     /**
      * Inserts message into editor kit.
      */
-	private void insert(Message m) {
-		try {
-			String s;
-			if ( m.isDisconnect() ) {
-				s = "You disconnected.";
-			} else {
-				s = m.getText();
+	private void insert(final Message m) {
+		// Always invoke from event dispatch thread
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					String s;
+					if ( m.isDisconnect() ) {
+						s = "You disconnected.";
+					} else {
+						s = m.getText();
+					}
+					s = s.replaceAll("&", "&amp;");			
+					s = s.replaceAll("<", "&lt;");
+					s = s.replaceAll(">", "&gt;");
+					s = s.replaceAll("&lt;fetstil&gt;", "<b>");
+					s = s.replaceAll("&lt;/fetstil&gt;", "</b>");
+					s = s.replaceAll("&lt;kursiv&gt;", "<i>");
+					s = s.replaceAll("&lt;/kursiv&gt;", "</i>");
+					kit.insertHTML(doc, doc.getLength(),"<pre><b>" + m.getSender() + ": </b><font color=\"" + m.getColor() + "\">" + s + "</font></pre>", 0, 0, null);
+				} catch (BadLocationException | IOException e) {
+					e.printStackTrace();
+				}
 			}
-			s = s.replaceAll("&", "&amp;");			
-			s = s.replaceAll("<", "&lt;");
-			s = s.replaceAll(">", "&gt;");
-			s = s.replaceAll("&lt;fetstil&gt;", "<b>");
-			s = s.replaceAll("&lt;/fetstil&gt;", "</b>");
-			s = s.replaceAll("&lt;kursiv&gt;", "<i>");
-			s = s.replaceAll("&lt;/kursiv&gt;", "</i>");
-			kit.insertHTML(doc, doc.getLength(),"<pre><b>" + m.getSender() + ": </b><font color=\"" + m.getColor() + "\">" + s + "</font></pre>", 0, 0, null);
-		} catch (BadLocationException | IOException e) {
-			e.printStackTrace();
-		}		
+		});
 	}
 	
 	public void setUserInput(String key, String value) {
@@ -242,6 +249,7 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 				}
 				
 				participants.removeAll(selectedParticipants);
+				insert(m);
 				break;
 		}
 	}
