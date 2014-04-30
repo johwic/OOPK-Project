@@ -238,18 +238,22 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 			case "disconnect":
 				m.setDisconnect(true);
 				m.setSender(userInput.get("user_name"));
-				
-				for ( SocketThread skt : selectedParticipants ) {
-					try {
-						skt.send(m);
-						skt.terminate();
-					} catch (IOException e) {
-						e.printStackTrace();
+				if ( selectedParticipants != null ) {
+					for ( SocketThread skt : selectedParticipants ) {
+						try {
+							skt.send(m);
+							skt.terminate();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
+					
+					participants.removeAll(selectedParticipants);
+					insert(m);
+				} else {
+					disconnectAll();
+					insert(m);
 				}
-				
-				participants.removeAll(selectedParticipants);
-				insert(m);
 				break;
 		}
 	}
