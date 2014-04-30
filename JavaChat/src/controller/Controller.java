@@ -74,7 +74,7 @@ public class Controller implements ServerSocketListener, ActionListener, WindowL
 				reply.setRequestReply("no");
 				reply.setRequestMessage("bas");
 			} else {
-				reply.setText("bas");
+				reply.setDisconnect(true);
 			}
 			
 			reply.setSender(((ServerSocketThread) e.getSource()).getName());
@@ -167,8 +167,8 @@ public class Controller implements ServerSocketListener, ActionListener, WindowL
 					
 					view.createTabUI(conversation, model.getUserInput("request_name"));
 					model.addConversation(conversation);
-				} catch (IOException e1) {
-					e1.printStackTrace();
+				} catch ( IllegalArgumentException | IOException e1) {
+					JOptionPane.showMessageDialog(null, "Connection failed. Please check that you have entered correct IP and port number.", "Connection failed", JOptionPane.INFORMATION_MESSAGE);
 				}
 				break;
 		}	
