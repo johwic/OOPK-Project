@@ -40,7 +40,7 @@ public class Keys {
      * algorithm as key.
      * @param algorithm string algorithm name
      */
-    void createKeyGen(String algorithm) {
+    synchronized void createKeyGen(String algorithm) {
 
         try {
             KeyGenerator kg = KeyGenerator.getInstance(algorithm);
@@ -54,7 +54,7 @@ public class Keys {
         }
     }
 
-    public SecretKey getKey(String algorithm) {
+    public synchronized SecretKey getKey(String algorithm) {
 
         return keyGenerators.get(algorithm).generateKey();
     }

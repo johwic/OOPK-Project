@@ -2,6 +2,7 @@ package crypto;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.util.HashMap;
 
@@ -13,8 +14,8 @@ import static javax.xml.bind.DatatypeConverter.printHexBinary;
  */
 public class Ciphers extends Keys {
 
-    public static final String AES_TRANSFORM = "AES/CBC/NoPadding";
-    public static final String DES_TRANSFORM = "DES/CBC/NoPadding";
+    //public static final String AES_TRANSFORM = "AES/CBC/NoPadding";
+    //public static final String DES_TRANSFORM = "DES/CBC/NoPadding";
 
     // supports several algorithms,
     // (we have to make a custom caesar cipher)
@@ -24,11 +25,11 @@ public class Ciphers extends Keys {
         createCiphers();
     }
 
-    void createCiphers(){
+    synchronized void createCiphers(){
         try {
 
-            ciphers.put(Keys.AES, Cipher.getInstance(Keys.AES));
-            ciphers.put(Keys.DES, Cipher.getInstance(Keys.DES));
+            ciphers.put(AES, Cipher.getInstance(AES));
+            ciphers.put(DES, Cipher.getInstance(DES));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -41,7 +42,7 @@ public class Ciphers extends Keys {
      * @param key private key
      * @return hexadecimal string
      */
-    public String encrypt(String message, SecretKey key, String algorithm) {
+    public synchronized String encrypt(String message, SecretKey key, String algorithm) {
 
         Cipher cipher = ciphers.get(algorithm);
 
@@ -51,7 +52,7 @@ public class Ciphers extends Keys {
         try {
 
             // convert to bytes
-            messageBytes = message.getBytes("UTF-8");
+            messageBytes = message.getBytes(StandardCharsets.UTF_8);
 
             // encrypt
             cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -72,7 +73,7 @@ public class Ciphers extends Keys {
      * @param key private key
      * @return decrypted string in human language
      */
-    public String decrypt(String encryptedHex, SecretKey key, String algorithm) {
+    public synchronized String decrypt(String encryptedHex, SecretKey key, String algorithm) {
 
         Cipher cipher = ciphers.get(algorithm);
 
@@ -88,7 +89,7 @@ public class Ciphers extends Keys {
             decryptedBytes = cipher.doFinal(encryptedBytes);
 
             // convert to string message
-            stringOut = new String(decryptedBytes, "UTF-8");
+            stringOut = new String(decryptedBytes, StandardCharsets.UTF_8);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -26,19 +26,19 @@ import static javax.xml.bind.DatatypeConverter.printHexBinary;
  */
 public class Crypto extends Ciphers {
 
-    public SecretKey hexToKey(String keyHex, String algorithm) {
+    public synchronized SecretKey hexToKey(String keyHex, String algorithm) {
 
         byte[] keyBytes = parseHexBinary(keyHex);
         return new SecretKeySpec(keyBytes, algorithm);
     }
 
-    public String keyToHex(SecretKey key) {
+    public synchronized String keyToHex(SecretKey key) {
 
         byte[] keyBytes = key.getEncoded();
         return printHexBinary(keyBytes);
     }
 
-    public void saveKeyToFile(SecretKey key, String filepath) {
+    public synchronized void saveKeyToFile(SecretKey key, String filepath) {
 
         // convert key to hex string and write to file
         String keyHex = keyToHex(key);
@@ -62,7 +62,7 @@ public class Crypto extends Ciphers {
 
     }
 
-    public SecretKey readKeyFromFile(String filepath, String algorithm) {
+    public synchronized SecretKey readKeyFromFile(String filepath, String algorithm) {
 
         Path path = null;
         try {

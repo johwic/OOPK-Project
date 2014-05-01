@@ -29,6 +29,7 @@ public class CryptoTestClient {
         String plaintext = "Hello! 012345000 ;-) &auml; <tag> </tag>";
 
         String algorithm = Crypto.AES;
+        //String algorithm = Crypto.DES;
 
         SecretKey key = crypto.getKey(algorithm);
 
