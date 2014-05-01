@@ -2,6 +2,7 @@ package crypto;
 
 import sun.text.normalizer.UTF16;
 
+import javax.crypto.SecretKey;
 import java.io.UnsupportedEncodingException;
 
 import static javax.xml.bind.DatatypeConverter.parseHexBinary;
@@ -23,41 +24,63 @@ public class CryptoTestClient {
 
     public static void main(String[] args) {
 
-        String a = "Hello!";
-        System.out.println(a);
+        Crypto crypto = new Crypto();
 
-        byte[] abytes;
+        String plaintext = "Hello! 012345000 ;-)";
 
-        try {
+        String algorithm = Crypto.AES;
 
-            abytes = a.getBytes("UTF-8");   // string to bytes (then encrypt)
+        SecretKey key = crypto.getKey(algorithm);
 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return;
-        }
+        String encyptedHex = crypto.encrypt(plaintext,key,algorithm);
 
+        String decrypted = crypto.decrypt(encyptedHex,key,algorithm);
 
-
-        String ahex = printHexBinary(abytes);   // bytes to hexstring (then send as message)
-
-        System.out.println(ahex);
-
-        byte[] bbytes = parseHexBinary(ahex);   // hexstring to bytes
-
-        String b;
-
-        try {
-
-            b = new String(bbytes, "UTF-8");
-
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        System.out.println(b);
-
+        System.out.println("--------------------------");
+        System.out.println("Plaintext to encrypt:");
+        System.out.println(plaintext);
+        System.out.println("Key:");
+        System.out.println(key.toString());
+        System.out.println("Encrypted hexadecimal:");
+        System.out.println(encyptedHex);
+        System.out.println("Decrypted plaintext:");
+        System.out.println(decrypted);
+        System.out.println("--------------------------");
 
     }
 }
+
+//String a = "Hello!";
+//System.out.println(a);
+//
+//        byte[] abytes;
+//
+//        try {
+//
+//        abytes = a.getBytes("UTF-8");   // string to bytes (then encrypt)
+//
+//        } catch (UnsupportedEncodingException e) {
+//        e.printStackTrace();
+//        return;
+//        }
+//
+//
+//
+//        String ahex = printHexBinary(abytes);   // bytes to hexstring (then send as message)
+//
+//        System.out.println(ahex);
+//
+//        byte[] bbytes = parseHexBinary(ahex);   // hexstring to bytes
+//
+//        String b;
+//
+//        try {
+//
+//        b = new String(bbytes, "UTF-8");
+//
+//        } catch (UnsupportedEncodingException e) {
+//        e.printStackTrace();
+//        return;
+//        }
+//
+//        System.out.println(b);
