@@ -31,16 +31,22 @@ public class CryptoTestClient {
         String algorithm = Crypto.AES;
 
         SecretKey key = crypto.getKey(algorithm);
+        String keyHex = crypto.keyToHex(key);
+        SecretKey key2 = crypto.hexToKey(keyHex,algorithm);
 
-        String encyptedHex = crypto.encrypt(plaintext,key,algorithm);
+        String encyptedHex = crypto.encrypt(plaintext,key2,algorithm);
 
-        String decrypted = crypto.decrypt(encyptedHex,key,algorithm);
+        String decrypted = crypto.decrypt(encyptedHex,key2,algorithm);
 
         System.out.println("--------------------------");
         System.out.println("Plaintext to encrypt:");
         System.out.println(plaintext);
         System.out.println("Key:");
         System.out.println(key.toString());
+        System.out.println("Key in hexadecimal:");
+        System.out.println(keyHex);
+        System.out.println("Key2:");
+        System.out.println(key2.toString());
         System.out.println("Encrypted hexadecimal:");
         System.out.println(encyptedHex);
         System.out.println("Decrypted plaintext:");
