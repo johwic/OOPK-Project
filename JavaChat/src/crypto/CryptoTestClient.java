@@ -14,19 +14,12 @@ import static javax.xml.bind.DatatypeConverter.printHexBinary;
  */
 public class CryptoTestClient {
 
-    // create a string to encrypt
-
-    // ask for keys
-
-    // encrypt string
-
-    // decrypt string
 
     public static void main(String[] args) {
 
         Crypto crypto = new Crypto();
 
-        String plaintext = "Hello! 012345000 ;-) &auml; <tag> </tag>";
+        String plaintext = "Hello! 012345000 ;-) &auml; <tag> </tag> tilde~";
 
         String algorithm = Crypto.AES;
         //String algorithm = Crypto.DES;
@@ -61,6 +54,46 @@ public class CryptoTestClient {
         System.out.println("Decrypted plaintext:");
         System.out.println(decrypted);
         System.out.println("--------------------------");
+
+
+        // exercise caesar
+        System.out.println("Exercising caesar!");
+
+        StringBuilder testString = new StringBuilder(); // we make a string with ascii 32-126
+        for (int i = 32; i <= 126; i++) {
+            testString.append((char) i);
+        }
+
+        System.out.println("Teststring: " + testString.toString());
+
+        CaesarCipher caesar = new CaesarCipher();
+
+        System.out.println("Testing keys 1-93.");
+        for (int ckey = 1; ckey <= 93; ckey++) {
+            String encryptedWithCaesar = caesar.encryptCaesar(testString.toString(),ckey);
+            //System.out.println(encryptedWithCaesar); // amusing
+            String decryptedWithCaesar = caesar.decryptCaesar(encryptedWithCaesar,ckey);
+
+            if (!decryptedWithCaesar.equals(testString.toString())) {
+                System.out.println("Decrypted string was different from encrypted!");
+            }
+        }
+
+        System.out.println("Testing 100 random keys with large integers.");
+        for (int i = 0; i < 100; i++) {
+            int ckey = caesar.getCaesarKey();
+            //System.out.println(ckey);
+            String encryptedWithCaesar = caesar.encryptCaesar(testString.toString(),ckey);
+            //System.out.println(encryptedWithCaesar);
+            String decryptedWithCaesar = caesar.decryptCaesar(encryptedWithCaesar,ckey);
+
+            if (!decryptedWithCaesar.equals(testString.toString())) {
+                System.out.println("Decrypted string was different from encrypted!");
+            }
+        }
+
+        System.out.println("Done exercising caesar.");
+
 
     }
 }

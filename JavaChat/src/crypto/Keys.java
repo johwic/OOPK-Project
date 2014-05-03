@@ -19,15 +19,15 @@ public class Keys {
     public static final String DES = "DES";
 
     // storage for generators and a handy list
-    HashMap<String,KeyGenerator> keyGenerators = new HashMap<String,KeyGenerator>();
+    HashMap<String, KeyGenerator> keyGenerators = new HashMap<String, KeyGenerator>();
     HashMap<String, Integer> keyLengths = new HashMap<String, Integer>();
     LinkedList<String> supportedAlgorithms = new LinkedList<String>();
 
     public Keys() {
 
         // define key lengths for supported algorithms
-        keyLengths.put(AES,AES_KEYLENGTH);
-        keyLengths.put(DES,DES_KEYLENGTH);
+        keyLengths.put(AES, AES_KEYLENGTH);
+        keyLengths.put(DES, DES_KEYLENGTH);
 
         // create key generators
         createKeyGen(AES);
@@ -38,6 +38,7 @@ public class Keys {
     /**
      * Creates a key generator and stores in hashmap with
      * algorithm as key.
+     *
      * @param algorithm string algorithm name
      */
     synchronized void createKeyGen(String algorithm) {
@@ -60,13 +61,14 @@ public class Keys {
     }
 
     // return a copy of supported algorithm list
-    public LinkedList<String> getSupportedCryptoList() {
+    public synchronized LinkedList<String> getSupportedCryptoList() {
         LinkedList<String> out = new LinkedList<String>();
         for (String e : supportedAlgorithms) {
             out.addLast(e);
         }
         return out;
     }
+}
 
 //    void createKeyPairGen(String algorithm) {
 //
@@ -93,4 +95,4 @@ public class Keys {
     // convert keys from hex
 
     // store keys
-}
+
