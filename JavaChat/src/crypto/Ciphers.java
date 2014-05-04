@@ -13,13 +13,9 @@ import static javax.xml.bind.DatatypeConverter.printHexBinary;
 /**
  * Created by mh on 30/04/14.
  */
-public class Ciphers extends Keys {
-
-    //public static final String AES_TRANSFORM = "AES/CBC/NoPadding";
-    //public static final String DES_TRANSFORM = "DES/CBC/NoPadding";
+public class Ciphers {
 
     // supports several algorithms,
-    // (we have to make a custom caesar cipher)
     HashMap<String,Cipher> ciphers = new HashMap<String,Cipher>();
     CaesarCipher caesar = new CaesarCipher();
 
@@ -27,11 +23,11 @@ public class Ciphers extends Keys {
         createCiphers();
     }
 
-    synchronized void createCiphers(){
+    private synchronized void createCiphers(){
         try {
 
-            ciphers.put(AES, Cipher.getInstance(AES));
-            ciphers.put(DES, Cipher.getInstance(DES));
+            ciphers.put(Crypto.AES, Cipher.getInstance(Crypto.AES));
+            ciphers.put(Crypto.DES, Cipher.getInstance(Crypto.DES));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -168,10 +164,13 @@ public class Ciphers extends Keys {
 
     public synchronized int hexToInt(String hexString) {
         byte[] keyBytes = parseHexBinary(hexString);
-        return 0;   // TODO
+        return 0;
     }
 
     public synchronized String intToHex(int i) {
-        return null; // TODO
+        return null;
     }
     */
+
+//public static final String AES_TRANSFORM = "AES/CBC/NoPadding";
+//public static final String DES_TRANSFORM = "DES/CBC/NoPadding";

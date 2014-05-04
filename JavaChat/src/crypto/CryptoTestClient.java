@@ -14,81 +14,100 @@ import static javax.xml.bind.DatatypeConverter.printHexBinary;
  */
 public class CryptoTestClient {
 
-    /*
+
     public static void main(String[] args) {
 
+        // first make a crypto object
         Crypto crypto = new Crypto();
 
-        String plaintext = "Hello! 012345000 ;-) &auml; <tag> </tag> tilde~";
+        //String plaintext = "Hello! 012345000 ;-) &auml; <tag> </tag> tilde~";
 
+        // we make a test string with ascii 32-126
+        StringBuilder sb = new StringBuilder();
+        for (int i = 32; i <= 126; i++) {
+            sb.append((char) i);
+        }
+        String plaintext = sb.toString();
+
+        // test a built in algorithm
         String algorithm = Crypto.AES;
         //String algorithm = Crypto.DES;
 
-        SecretKey key = crypto.getKey(algorithm);
+        // test twice
+        for (int i = 0; i < 2; i++) {
+
+            // get a key in hex format
+            String key = crypto.getKey(algorithm);
+
+            // encrypt with it
+            String encyptedHex = crypto.encrypt(plaintext, key, algorithm);
+
+            // save key (file will be a hexadecimal string)
+            crypto.saveKeyToFile(key, "testkey.jmk");
+
+            // read back with readHexKeyFromFile
+            String key2 = crypto.readHexKeyFromFile("testkey.jmk", algorithm);
+
+            // decrypt with the key we saved to file
+            String decrypted = crypto.decrypt(encyptedHex, key2, algorithm);
 
 
-        // save and read back key (file will be a hexadecimal string)
-        crypto.saveKeyToFile(key, "testkey.jmk");
-        SecretKey key2 = crypto.readKeyFromFile("testkey.jmk", algorithm);
+            System.out.println("--------------------------");
+            System.out.println("Plaintext to encrypt:");
+            System.out.println(plaintext);
+            System.out.println("Key in hexadecimal:");
+            System.out.println(key);
+            System.out.println("Key read from file:");
+            System.out.println(key2);
+            System.out.println("Encrypted text as hexadecimal:");
+            System.out.println(encyptedHex);
+            System.out.println("Decrypted plaintext:");
+            System.out.println(decrypted);
 
-        // use the key we saved to file
-        String encyptedHex = crypto.encrypt(plaintext,key2,algorithm);
-        String decrypted = crypto.decrypt(encyptedHex,key2,algorithm);
+            if (!plaintext.equals(decrypted)) {
+                System.out.println("*** plaintext and decrypted are different !!! ***");
+            }
 
-        // we can use conversion methods directly too
-        String keyHex = crypto.keyToHex(key);
-        SecretKey backToKey = crypto.hexToKey(keyHex,algorithm);
-
-
-        System.out.println("--------------------------");
-        System.out.println("Plaintext to encrypt:");
-        System.out.println(plaintext);
-        System.out.println("Key saved to file:");
-        System.out.println(key.toString());
-        System.out.println("Key in hexadecimal:");
-        System.out.println(keyHex);
-        System.out.println("Key read from file:");
-        System.out.println(key2.toString());
-        System.out.println("Encrypted text as hexadecimal:");
-        System.out.println(encyptedHex);
-        System.out.println("Decrypted plaintext:");
-        System.out.println(decrypted);
-        System.out.println("--------------------------");
-
-
-        // exercise caesar
-        System.out.println("Exercising caesar!");
-
-        StringBuilder testString = new StringBuilder(); // we make a string with ascii 32-126
-        for (int i = 32; i <= 126; i++) {
-            testString.append((char) i);
+            System.out.println("--------------------------");
         }
 
-        System.out.println("Teststring: " + testString.toString());
+        // exercise caesar
+        System.out.println("--------------------------");
+        System.out.println("Exercising caesar!");
+        System.out.println("Plaintext to encrypt:");
+        System.out.println(plaintext);
 
-        CaesarCipher caesar = new CaesarCipher();
+        // set algorithm
+        algorithm = Crypto.CAESAR;
 
         System.out.println("Testing keys 1-93.");
-        for (int ckey = 1; ckey <= 93; ckey++) {
-            String encryptedWithCaesar = caesar.encrypt(testString.toString(),ckey);
-            //System.out.println(encryptedWithCaesar); // amusing
-            String decryptedWithCaesar = caesar.decrypt(encryptedWithCaesar,ckey);
+        for (int i = 1; i <= 93; i++) {
 
-            if (!decryptedWithCaesar.equals(testString.toString())) {
-                System.out.println("Decrypted string was different from encrypted!");
+            String ckey = Conversion.intToHex(i);   // normally we would use getKey
+            //System.out.println(ckey);
+
+            String encryptedWithCaesar = crypto.encrypt(plaintext,ckey,algorithm);
+            //System.out.println(encryptedWithCaesar); // amusing
+
+            String decryptedWithCaesar = crypto.decrypt(encryptedWithCaesar,ckey,algorithm);
+
+            if (!decryptedWithCaesar.equals(plaintext.toString())) {
+                System.out.println("*** Decrypted string was different from encrypted! ***");
             }
         }
 
         System.out.println("Testing 100 random keys with large integers.");
         for (int i = 0; i < 100; i++) {
-            int ckey = caesar.getCaesarKey();
-            //System.out.println(ckey);
-            String encryptedWithCaesar = caesar.encrypt(testString.toString(),ckey);
-            //System.out.println(encryptedWithCaesar);
-            String decryptedWithCaesar = caesar.decrypt(encryptedWithCaesar,ckey);
+            String ckey = crypto.getKey(algorithm); // we get hex format right away
+            // System.out.println(ckey);
 
-            if (!decryptedWithCaesar.equals(testString.toString())) {
-                System.out.println("Decrypted string was different from encrypted!");
+            String encryptedWithCaesar = crypto.encrypt(plaintext,ckey,algorithm);
+            //System.out.println(encryptedWithCaesar);
+
+            String decryptedWithCaesar = crypto.decrypt(encryptedWithCaesar,ckey,algorithm);
+
+            if (!decryptedWithCaesar.equals(plaintext.toString())) {
+                System.out.println("*** Decrypted string was different from encrypted! ***");
             }
         }
 
@@ -96,7 +115,7 @@ public class CryptoTestClient {
 
 
     }
-    */
+
 }
 
 //String a = "Hello!";

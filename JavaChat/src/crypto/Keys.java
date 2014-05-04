@@ -6,6 +6,7 @@ import java.security.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Random;
 
 import static javax.xml.bind.DatatypeConverter.parseHexBinary;
 import static javax.xml.bind.DatatypeConverter.printHexBinary;
@@ -16,26 +17,24 @@ import static javax.xml.bind.DatatypeConverter.printHexBinary;
  */
 public class Keys {
 
-    public static final int AES_KEYLENGTH = 128;
-    public static final int DES_KEYLENGTH = 56;
-
-    public static final String AES = "AES";
-    public static final String DES = "DES";
-
     // storage for generators and a handy list
     HashMap<String, KeyGenerator> keyGenerators = new HashMap<String, KeyGenerator>();
     HashMap<String, Integer> keyLengths = new HashMap<String, Integer>();
+
+    Random caesarKeyGen = new Random();  // not cryptosecure
+
+
     LinkedList<String> supportedAlgorithms = new LinkedList<String>();
 
     public Keys() {
 
         // define key lengths for supported algorithms
-        keyLengths.put(AES, AES_KEYLENGTH);
-        keyLengths.put(DES, DES_KEYLENGTH);
+        keyLengths.put(Crypto.AES, Crypto.AES_KEYLENGTH);
+        keyLengths.put(Crypto.DES, Crypto.DES_KEYLENGTH);
 
         // create key generators
-        createKeyGen(AES);
-        createKeyGen(DES);
+        createKeyGen(Crypto.AES);
+        createKeyGen(Crypto.DES);
 
     }
 
@@ -45,7 +44,7 @@ public class Keys {
      *
      * @param algorithm string algorithm name
      */
-    synchronized void createKeyGen(String algorithm) {
+    private synchronized void createKeyGen(String algorithm) {
 
         try {
             KeyGenerator kg = KeyGenerator.getInstance(algorithm);
@@ -64,6 +63,11 @@ public class Keys {
         return keyGenerators.get(algorithm).generateKey();
     }
 
+    public synchronized int getCaesarKey() {
+
+        return caesarKeyGen.nextInt(Integer.MAX_VALUE-10)+1;  // between 1 and something very large
+    }
+
     // return a copy of supported algorithm list
     public synchronized LinkedList<String> getSupportedCryptoList() {
         LinkedList<String> out = new LinkedList<String>();
@@ -72,8 +76,6 @@ public class Keys {
         }
         return out;
     }
-
-
 }
 
 //    void createKeyPairGen(String algorithm) {

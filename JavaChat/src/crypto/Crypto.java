@@ -24,22 +24,62 @@ import static javax.xml.bind.DatatypeConverter.printHexBinary;
 /**
  * Created by mh on 01/05/14.
  */
-public class Crypto  extends Ciphers {
+public class Crypto extends Ciphers {
 
+    public static final String AES = "AES";
+    public static final String DES = "DES";
+    public static final String CAESAR = "Caesar";
 
+    public static final int AES_KEYLENGTH = 128;
+    public static final int DES_KEYLENGTH = 56;
+
+    Keys keys = new Keys();
+    //Ciphers ciphers = new Ciphers();
+
+    // key
+
+    public synchronized String getKey(String algorithm) {
+        if (algorithm.equals(CAESAR)) {
+            int key = keys.getCaesarKey();
+            return Conversion.intToHex(key);
+        } else {
+            SecretKey key = keys.getKey(algorithm);
+            return Conversion.keyToHex(key);
+        }
+    }
+
+    // encrypt and decrypt defined in ciphers
+
+    // file operations
+
+    /**
+     * Saves SecretKey to file (converts to hex).
+     * @param key SecretKey
+     * @param filepath
+     */
     public synchronized void saveKeyToFile(SecretKey key, String filepath) {
 
         // convert key to hex string and write to file
-        String keyHex = keyToHex(key);
+        String keyHex = Conversion.keyToHex(key);
         saveToFile(keyHex, filepath);
     }
 
+    /**
+     * Saves key to file.
+     * @param keyHex hex string
+     * @param filepath path(optional) and filename (suffix is appended)
+     */
     public synchronized void saveKeyToFile(String keyHex, String filepath) {
 
         // write directly to file
         saveToFile(keyHex, filepath);
     }
 
+    /**
+     * Helper
+     * @param stringToSave
+     * @param filepath
+     */
     private synchronized void saveToFile(String stringToSave, String filepath) {
 
         Path path = null;
@@ -59,16 +99,33 @@ public class Crypto  extends Ciphers {
         }
     }
 
+    /**
+     * Reads key from file.
+     * @param filepath
+     * @param algorithm
+     * @return SecretKey
+     */
     public synchronized SecretKey readKeyFromFile(String filepath, String algorithm) {
 
         String keyHex = readFromFile(filepath);
-        return hexToKey(keyHex, algorithm);
+        return Conversion.hexToKey(keyHex, algorithm);
     }
 
+    /**
+     * Reads key from file.
+     * @param filepath
+     * @param algorithm
+     * @return String in hex format
+     */
     public synchronized String readHexKeyFromFile(String filepath, String algorithm) {
         return readFromFile(filepath);
     }
 
+    /**
+     * Helper
+     * @param filepath
+     * @return
+     */
     private synchronized String readFromFile(String filepath) {
 
         Path path = null;

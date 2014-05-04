@@ -46,6 +46,11 @@ public class ConversionTestClient {
         i = Conversion.hexToInt(hex);
         System.out.println("Back: " + i);
 
+    }
+}
+
+
+
 
         /*
         System.out.println("----------------------");
@@ -80,5 +85,3 @@ public class ConversionTestClient {
         i = bi.intValue();
         System.out.println("Back: " + i);
         */
-    }
-}

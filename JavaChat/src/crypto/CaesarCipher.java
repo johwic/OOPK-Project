@@ -18,24 +18,6 @@ public class CaesarCipher {
     public static final int ASCII_END = 126;
     public static final int ASCII_RANGE = ASCII_END - ASCII_START;
 
-    Random keyGen;  // not cryptosecure
-
-    public CaesarCipher() {
-        keyGen = new Random();
-    }
-
-    public int getCaesarKey() {
-
-        return keyGen.nextInt(Integer.MAX_VALUE-10)+1;  // between 1 and something very large
-        //return keyGen.nextInt(10)+1;  // between 1 and 10 for testing
-
-    }
-
-    public String encryptCaesar(String message, String key) {
-        // TODO
-        return null;
-    }
-
     public String encrypt(String message, int key) {
 
         int adder = (key % ASCII_RANGE-1) + 1;  // we add only a number between 1 and 93
@@ -51,7 +33,6 @@ public class CaesarCipher {
             }
 
             letter = (char) t;
-
             sb.append(letter);
         }
 
@@ -65,8 +46,6 @@ public class CaesarCipher {
         StringBuilder sb = new StringBuilder();
 
         byte[] encryptedBytes = parseHexBinary(encryptedHex);
-
-
         char[] encryptedChar = new String(encryptedBytes, StandardCharsets.UTF_8).toCharArray();
 
         for (char letter : encryptedChar) {
@@ -78,7 +57,6 @@ public class CaesarCipher {
             }
 
             letter = (char) t;
-
             sb.append(letter);
         }
 
@@ -86,3 +64,15 @@ public class CaesarCipher {
     }
 
 }
+
+//Random keyGen;  // not cryptosecure
+
+//    public CaesarCipher() {
+//        keyGen = new Random();
+//    }
+
+//    public int getKey() {
+//
+//        return keyGen.nextInt(Integer.MAX_VALUE-10)+1;  // between 1 and something very large
+//        //return keyGen.nextInt(10)+1;  // between 1 and 10 for testing
+//    }
