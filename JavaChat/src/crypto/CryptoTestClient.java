@@ -29,6 +29,12 @@ public class CryptoTestClient {
         }
         String plaintext = sb.toString();
 
+        // print list of supported algorithms
+        System.out.println("Supported algorithms:");
+        for(String e : crypto.getSupportedCryptoList()) {
+            System.out.println(e);
+        }
+
         // test a built in algorithm
         String algorithm = Crypto.AES;
         //String algorithm = Crypto.DES;

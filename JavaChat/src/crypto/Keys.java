@@ -23,9 +23,6 @@ public class Keys {
 
     Random caesarKeyGen = new Random();  // not cryptosecure
 
-
-    LinkedList<String> supportedAlgorithms = new LinkedList<String>();
-
     public Keys() {
 
         // define key lengths for supported algorithms
@@ -49,11 +46,10 @@ public class Keys {
     private synchronized void createKeyGen(String algorithm) {
 
         try {
+
             KeyGenerator kg = KeyGenerator.getInstance(algorithm);
             kg.init(keyLengths.get(algorithm));
-
             keyGenerators.put(algorithm, kg);
-            supportedAlgorithms.add(algorithm);
 
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -68,15 +64,6 @@ public class Keys {
     public synchronized int getCaesarKey() {
 
         return caesarKeyGen.nextInt(Integer.MAX_VALUE-10)+1;  // between 1 and something very large
-    }
-
-    // return a copy of supported algorithm list
-    public synchronized LinkedList<String> getSupportedCryptoList() {
-        LinkedList<String> out = new LinkedList<String>();
-        for (String e : supportedAlgorithms) {
-            out.addLast(e);
-        }
-        return out;
     }
 }
 
@@ -106,3 +93,11 @@ public class Keys {
 
     // store keys
 
+// return a copy of supported algorithm list
+//    public synchronized LinkedList<String> getSupportedCryptoList() {
+//        LinkedList<String> out = new LinkedList<String>();
+//        for (String e : supportedAlgorithms) {
+//            out.addLast(e);
+//        }
+//        return out;
+//    }

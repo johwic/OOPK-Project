@@ -37,12 +37,23 @@ public class Crypto extends Ciphers {
     public static final int DES_KEYLENGTH = 56;
     public static final int BLOWFISH_KEYLENGTH = 128;
 
-
     Keys keys = new Keys();
-    //Ciphers ciphers = new Ciphers();
 
+    LinkedList<String> supportedAlgorithms = new LinkedList<String>();
+
+    public Crypto() {
+        supportedAlgorithms.add(AES);
+        supportedAlgorithms.add(DES);
+        supportedAlgorithms.add(BLOWFISH);
+        supportedAlgorithms.add(CAESAR);
+    }
     // key
 
+    /**
+     * Generates appropriate key for the requested algorithm.
+     * @param algorithm
+     * @return hexadecimal string
+     */
     public synchronized String getKey(String algorithm) {
         if (algorithm.equals(CAESAR)) {
             int key = keys.getCaesarKey();
@@ -52,8 +63,6 @@ public class Crypto extends Ciphers {
             return Conversion.keyToHex(key);
         }
     }
-
-    // encrypt and decrypt defined in ciphers
 
     // file operations
 
@@ -155,6 +164,15 @@ public class Crypto extends Ciphers {
         }
 
         return stringToRead;
+    }
+
+    // return a copy of supported algorithm list
+    public synchronized LinkedList<String> getSupportedCryptoList() {
+        LinkedList<String> out = new LinkedList<String>();
+        for (String e : supportedAlgorithms) {
+            out.addLast(e);
+        }
+        return out;
     }
 
 }
