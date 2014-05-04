@@ -32,6 +32,8 @@ public class CryptoTestClient {
         // test a built in algorithm
         String algorithm = Crypto.AES;
         //String algorithm = Crypto.DES;
+        //String algorithm = Crypto.BLOWFISH;
+
 
         // test twice
         for (int i = 0; i < 2; i++) {

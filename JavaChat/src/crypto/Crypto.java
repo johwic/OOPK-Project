@@ -28,10 +28,15 @@ public class Crypto extends Ciphers {
 
     public static final String AES = "AES";
     public static final String DES = "DES";
+    public static final String BLOWFISH = "Blowfish";
+
     public static final String CAESAR = "Caesar";
 
+    // these apparently are the max keylengths with the default java distro
     public static final int AES_KEYLENGTH = 128;
     public static final int DES_KEYLENGTH = 56;
+    public static final int BLOWFISH_KEYLENGTH = 128;
+
 
     Keys keys = new Keys();
     //Ciphers ciphers = new Ciphers();

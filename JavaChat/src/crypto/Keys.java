@@ -31,11 +31,13 @@ public class Keys {
         // define key lengths for supported algorithms
         keyLengths.put(Crypto.AES, Crypto.AES_KEYLENGTH);
         keyLengths.put(Crypto.DES, Crypto.DES_KEYLENGTH);
+        keyLengths.put(Crypto.BLOWFISH, Crypto.BLOWFISH_KEYLENGTH);
+
 
         // create key generators
         createKeyGen(Crypto.AES);
         createKeyGen(Crypto.DES);
-
+        createKeyGen(Crypto.BLOWFISH);
     }
 
     /**

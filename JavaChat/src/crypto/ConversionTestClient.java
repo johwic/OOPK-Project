@@ -1,6 +1,5 @@
 package crypto;
 
-import java.math.BigInteger;
 
 /**
  * Created by mh on 04/05/14.
@@ -14,7 +13,6 @@ public class ConversionTestClient {
         int MAX = Integer.MAX_VALUE;
         int POS = 12345;
 
-        //BigInteger bi;
         int i;
         String hex;
 

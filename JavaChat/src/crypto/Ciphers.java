@@ -28,6 +28,7 @@ public class Ciphers {
 
             ciphers.put(Crypto.AES, Cipher.getInstance(Crypto.AES));
             ciphers.put(Crypto.DES, Cipher.getInstance(Crypto.DES));
+            ciphers.put(Crypto.BLOWFISH, Cipher.getInstance(Crypto.BLOWFISH));
 
         } catch (Exception e) {
             e.printStackTrace();
