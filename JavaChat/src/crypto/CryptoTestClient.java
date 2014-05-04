@@ -14,7 +14,7 @@ import static javax.xml.bind.DatatypeConverter.printHexBinary;
  */
 public class CryptoTestClient {
 
-
+    /*
     public static void main(String[] args) {
 
         Crypto crypto = new Crypto();
@@ -70,9 +70,9 @@ public class CryptoTestClient {
 
         System.out.println("Testing keys 1-93.");
         for (int ckey = 1; ckey <= 93; ckey++) {
-            String encryptedWithCaesar = caesar.encryptCaesar(testString.toString(),ckey);
+            String encryptedWithCaesar = caesar.encrypt(testString.toString(),ckey);
             //System.out.println(encryptedWithCaesar); // amusing
-            String decryptedWithCaesar = caesar.decryptCaesar(encryptedWithCaesar,ckey);
+            String decryptedWithCaesar = caesar.decrypt(encryptedWithCaesar,ckey);
 
             if (!decryptedWithCaesar.equals(testString.toString())) {
                 System.out.println("Decrypted string was different from encrypted!");
@@ -83,9 +83,9 @@ public class CryptoTestClient {
         for (int i = 0; i < 100; i++) {
             int ckey = caesar.getCaesarKey();
             //System.out.println(ckey);
-            String encryptedWithCaesar = caesar.encryptCaesar(testString.toString(),ckey);
+            String encryptedWithCaesar = caesar.encrypt(testString.toString(),ckey);
             //System.out.println(encryptedWithCaesar);
-            String decryptedWithCaesar = caesar.decryptCaesar(encryptedWithCaesar,ckey);
+            String decryptedWithCaesar = caesar.decrypt(encryptedWithCaesar,ckey);
 
             if (!decryptedWithCaesar.equals(testString.toString())) {
                 System.out.println("Decrypted string was different from encrypted!");
@@ -96,6 +96,7 @@ public class CryptoTestClient {
 
 
     }
+    */
 }
 
 //String a = "Hello!";

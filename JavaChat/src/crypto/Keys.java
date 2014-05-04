@@ -1,10 +1,14 @@
 package crypto;
 
 import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+
+import static javax.xml.bind.DatatypeConverter.parseHexBinary;
+import static javax.xml.bind.DatatypeConverter.printHexBinary;
 
 
 /**
@@ -68,6 +72,8 @@ public class Keys {
         }
         return out;
     }
+
+
 }
 
 //    void createKeyPairGen(String algorithm) {

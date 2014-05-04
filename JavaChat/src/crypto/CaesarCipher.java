@@ -31,7 +31,12 @@ public class CaesarCipher {
 
     }
 
-    public String encryptCaesar(String message, int key) {
+    public String encryptCaesar(String message, String key) {
+        // TODO
+        return null;
+    }
+
+    public String encrypt(String message, int key) {
 
         int adder = (key % ASCII_RANGE-1) + 1;  // we add only a number between 1 and 93
 
@@ -53,7 +58,7 @@ public class CaesarCipher {
         return printHexBinary(sb.toString().getBytes(StandardCharsets.UTF_8));
     }
 
-    public String decryptCaesar(String encryptedHex, int key) {
+    public String decrypt(String encryptedHex, int key) {
 
         int adder = (key % ASCII_RANGE-1) + 1;  // we add only a number between 1 and 93
 

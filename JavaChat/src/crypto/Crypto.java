@@ -24,25 +24,23 @@ import static javax.xml.bind.DatatypeConverter.printHexBinary;
 /**
  * Created by mh on 01/05/14.
  */
-public class Crypto extends Ciphers {
+public class Crypto  extends Ciphers {
 
-    public synchronized SecretKey hexToKey(String keyHex, String algorithm) {
-
-        byte[] keyBytes = parseHexBinary(keyHex);
-        return new SecretKeySpec(keyBytes, algorithm);
-    }
-
-    public synchronized String keyToHex(SecretKey key) {
-
-        byte[] keyBytes = key.getEncoded();
-        return printHexBinary(keyBytes);
-    }
 
     public synchronized void saveKeyToFile(SecretKey key, String filepath) {
 
         // convert key to hex string and write to file
         String keyHex = keyToHex(key);
+        saveToFile(keyHex, filepath);
+    }
 
+    public synchronized void saveKeyToFile(String keyHex, String filepath) {
+
+        // write directly to file
+        saveToFile(keyHex, filepath);
+    }
+
+    private synchronized void saveToFile(String stringToSave, String filepath) {
 
         Path path = null;
         try {
@@ -54,15 +52,24 @@ public class Crypto extends Ciphers {
         BufferedWriter writer;
         try {
             writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8);
-            writer.write(keyHex);
+            writer.write(stringToSave);
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     public synchronized SecretKey readKeyFromFile(String filepath, String algorithm) {
+
+        String keyHex = readFromFile(filepath);
+        return hexToKey(keyHex, algorithm);
+    }
+
+    public synchronized String readHexKeyFromFile(String filepath, String algorithm) {
+        return readFromFile(filepath);
+    }
+
+    private synchronized String readFromFile(String filepath) {
 
         Path path = null;
         try {
@@ -72,20 +79,20 @@ public class Crypto extends Ciphers {
         }
 
         BufferedReader reader;
-        String keyHex = null;
+        String stringToRead = null;
 
         // read key (hex string) and convert to SecretKey
         try {
 
             reader = Files.newBufferedReader(path, StandardCharsets.UTF_8);
-            keyHex = reader.readLine(); // we assume key is one line
+            stringToRead = reader.readLine(); // we assume key is one line
             reader.close();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return hexToKey(keyHex, algorithm);
+        return stringToRead;
     }
 
 }
