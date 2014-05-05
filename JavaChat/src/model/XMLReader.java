@@ -150,6 +150,7 @@ public class XMLReader implements Closeable {
 		boolean decrypt = false;
 		String type = null;
 		String key = null;
+		String tagContent = null;
 		
 		while (reader.hasNext()) {
 			XMLEvent event = reader.nextEvent();
@@ -173,37 +174,37 @@ public class XMLReader implements Closeable {
 							Attribute attribute = (Attribute) attributes.next();
 							addAttribute(elem.getName().getLocalPart(), attribute.getName().getLocalPart(), attribute.getValue(), decrypt, type, key);
 						}
-						if (elem.getName().getLocalPart().equals(TEXT)) {
-							event = reader.nextEvent();
-							System.out.println(event.toString());
-							addTag(TEXT, event.asCharacters().getData(), decrypt, type, key);
-						}
-						if (elem.getName().getLocalPart().equals(REQUEST)) {
-							event = reader.nextEvent();
-							System.out.println(event.toString());
-							addTag(REQUEST, event.asCharacters().getData(), decrypt, type, key);
-						}
-						if (elem.getName().getLocalPart().equals("filerequest")) {
-							event = reader.nextEvent();
-							System.out.println(event.toString());
-							addTag("filerequest", event.asCharacters().getData(), decrypt, type, key);
-						}
-						if (elem.getName().getLocalPart().equals("fileresponse")) {
-							event = reader.nextEvent();
-							System.out.println(event.toString());
-							addTag("fileresponse", event.asCharacters().getData(), decrypt, type, key);
-						}
-						if (elem.getName().getLocalPart().equals("keyrequest")) {
-							event = reader.nextEvent();
-							System.out.println(event.toString());
-							addTag("keyrequest", event.asCharacters().getData(), decrypt, type, key);
-						}						
+//						if (elem.getName().getLocalPart().equals(TEXT)) {
+//							event = reader.nextEvent();
+//							System.out.println(event.toString());
+//							addTag(TEXT, event.asCharacters().getData(), decrypt, type, key);
+//						}
+//						if (elem.getName().getLocalPart().equals(REQUEST)) {
+//							event = reader.nextEvent();
+//							System.out.println(event.toString());
+//							addTag(REQUEST, event.asCharacters().getData(), decrypt, type, key);
+//						}
+//						if (elem.getName().getLocalPart().equals("filerequest")) {
+//							event = reader.nextEvent();
+//							System.out.println(event.toString());
+//							addTag("filerequest", event.asCharacters().getData(), decrypt, type, key);
+//						}
+//						if (elem.getName().getLocalPart().equals("fileresponse")) {
+//							event = reader.nextEvent();
+//							System.out.println(event.toString());
+//							addTag("fileresponse", event.asCharacters().getData(), decrypt, type, key);
+//						}
+//						if (elem.getName().getLocalPart().equals("keyrequest")) {
+//							event = reader.nextEvent();
+//							System.out.println(event.toString());
+//							addTag("keyrequest", event.asCharacters().getData(), decrypt, type, key);
+//						}						
 					}
 					break;
 	
-					//case XMLStreamConstants.CHARACTERS:
-						//	tagContent = event.asCharacters().getData().trim();
-					//	break;
+				case XMLStreamConstants.CHARACTERS:
+					tagContent = event.asCharacters().getData();
+					break;
 	
 				case XMLStreamConstants.END_ELEMENT:
 					EndElement elem1 = event.asEndElement();
@@ -214,8 +215,10 @@ public class XMLReader implements Closeable {
 						message.setDisconnect(true);
 					} else if ( elem1.getName().getLocalPart().equals("encrypted")) {
 						decrypt = false;
+					} else {
+						addTag(elem1.getName().getLocalPart(), tagContent, decrypt, type, key);
+						tagContent = null;
 					}
-					//addTag(elem1.getName().getLocalPart(), tagContent);
 					break;
 			}
 		}

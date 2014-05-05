@@ -69,7 +69,7 @@ public class XMLWriter implements Closeable {
 				writer.writeAttribute("port", crypto.encrypt(Integer.toString(m.getFilePort()), key, m.getEncryptionAlgo()));
 				writer.writeCharacters(crypto.encrypt(m.getFileResponseMessage(), key, m.getEncryptionAlgo()));
 				writer.writeEndElement();
-			} else {
+			} else if ( m.getText() != null ) {
 				writer.writeStartElement("text");
 				if ( m.getColor() != null ) {
 					writer.writeAttribute("color", crypto.encrypt(m.getColor(), key, m.getEncryptionAlgo()));
@@ -101,7 +101,7 @@ public class XMLWriter implements Closeable {
 				writer.writeAttribute("port", Integer.toString(m.getFilePort()));
 				writer.writeCharacters(m.getFileResponseMessage());
 				writer.writeEndElement();
-			} else {
+			} else if ( m.getText() != null ) {
 				writer.writeStartElement("text");
 				if ( m.getColor() != null ) {
 					writer.writeAttribute("color", m.getColor());
