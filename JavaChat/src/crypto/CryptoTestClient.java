@@ -1,14 +1,5 @@
 package crypto;
 
-import sun.text.normalizer.UTF16;
-
-import javax.crypto.SecretKey;
-import java.io.UnsupportedEncodingException;
-
-import static javax.xml.bind.DatatypeConverter.parseHexBinary;
-import static javax.xml.bind.DatatypeConverter.printByte;
-import static javax.xml.bind.DatatypeConverter.printHexBinary;
-
 /**
  * Created by mh on 30/04/14.
  */

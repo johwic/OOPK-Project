@@ -48,8 +48,8 @@ public class View extends JPanel {
 		tabs.add("Start", startPanel);
 		
 	    GroupLayout layout = new GroupLayout(this);
-	    layout.setAutoCreateContainerGaps(true);
-	    layout.setAutoCreateGaps(true);
+	    layout.setAutoCreateContainerGaps(false);
+	    layout.setAutoCreateGaps(false);
 	    
 	    setLayout(layout);
 	    layout.setHorizontalGroup(layout.createParallelGroup().addComponent(tabs));

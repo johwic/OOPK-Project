@@ -2,11 +2,17 @@ package model;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -20,6 +26,8 @@ import javax.swing.text.EditorKit;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+
+import crypto.Crypto;
 
 /**
  * Manages list of participants (threads).
@@ -36,11 +44,17 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 	
 	private final HTMLDocument doc;
 	private final HTMLEditorKit kit;
+	
 	private List<SocketThread> selectedParticipants = null;
+	private FileHandler handler;
+	private Crypto crypto;
 	
 	public Conversation() {
 		this.doc = new HTMLDocument();
 		this.kit = new HTMLEditorKit();
+		
+		this.handler = new FileHandler();
+		this.crypto = new Crypto();
 	}
 
     /**
@@ -71,6 +85,15 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 	
 	public ParticipantList<SocketThread> getParticipants() {
 		return participants;
+	}
+	
+	public DefaultComboBoxModel<String> getSupportedAlgorithms() {
+		DefaultComboBoxModel<String> ret = new DefaultComboBoxModel<String>();
+		ret.addElement("Unencrypted");
+		for ( String e : crypto.getSupportedCryptoList()) {
+			ret.addElement(e);
+		}
+		return ret;
 	}
 	
 	public boolean isNew() {
@@ -235,6 +258,7 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 				
 				send(m);
 				break;
+				
 			case "disconnect":
 				m.setDisconnect(true);
 				m.setSender(userInput.get("user_name"));
@@ -254,6 +278,60 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 					disconnectAll();
 					insert(m);
 				}
+				break;
+				
+			case "send_file":
+				if ( !userInput.containsKey("file_path") ) {
+					JOptionPane.showMessageDialog(null, "Please choose a file.", "Invalid input", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				
+				if ( selectedParticipants != null  ) {
+					File file = new File(userInput.get("file_path"));
+					if ( file.isFile() ) {
+						m.setSender(userInput.get("user_name"));
+						m.setFileName(file.getName());
+						m.setFileSize((int) file.length());
+						m.setFileMessage("Test");
+						
+						for ( SocketThread skt : selectedParticipants ) {
+							skt.send(m);
+							handler.sendFile(file, skt.getIp());
+						}
+					}
+				}
+				break;
+				
+			case "set_crypto":
+				if ( !userInput.containsKey("selected_crypto") ) {
+					return;
+				}				
+				
+				if ( selectedParticipants != null  ) {
+						
+					for ( SocketThread skt : selectedParticipants ) {
+						if ( userInput.get("selected_crypto").equals("Unencrypted") ) {
+							skt.setAlgorithm(null);
+						} else {
+							skt.setAlgorithm(userInput.get("selected_crypto"));
+						}
+					}
+				}
+				break;
+				
+			case "request_key":
+				if ( !userInput.containsKey("selected_crypto") ) {
+					JOptionPane.showMessageDialog(null, "Please select an algorithm", "Invalid input", JOptionPane.INFORMATION_MESSAGE);
+					return;
+				}
+				
+				m.setSender(userInput.get("user_name"));
+				m.setKeyRequest(userInput.get("key_request_msg"));
+				m.setKeyRequestType(userInput.get("selected_crypto"));
+				
+				for ( SocketThread skt : selectedParticipants ) {
+					skt.send(m);
+				}				
 				break;
 		}
 	}
@@ -322,10 +400,35 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 			message.setColor("#000000");
 			insert(message);
 
-		} else {
+		} else if ( m.getFileResponse() != null ) {
+			handler.addResponse(m);
+			System.out.println("Response received");
+		} else if ( m.getFileName() != null ) {
+			handler.addRequest(m, source);
+			System.out.println("Request received");
+		} else if ( m.getKeyRequest() != null ) {
+			Message message = new Message();
+			message.setSender(userInput.get("user_name"));
+			if ( crypto.getSupportedCryptoList().contains(m.getKeyRequestType())) {
+				message.setEncryptionAlgo(m.getKeyRequestType());
+				message.setEncryptionKey(crypto.getKey(m.getKeyRequestType()));
+			} else {
+				message.setEncryptionAlgo(Crypto.AES);
+				message.setEncryptionKey(crypto.getKey(Crypto.AES));
+			}
+			
+			source.send(message);
+			
+			Message msg = new Message();
+			msg.setSender("Server");
+			msg.setText(m.getSender() + " requested a key of type " + m.getKeyRequestType() + ". Message: " +  m.getKeyRequest());
+			insert(msg);
+		} else if ( m.getText() != null ) {
             // if not a disconnect message, forward to everyone and display message locally
 			relay(source, m);
 			insert(m);
+		} else {
+			
 		}
 	}
 

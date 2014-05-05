@@ -5,12 +5,17 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.GroupLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -38,7 +43,8 @@ public class TabInterface extends JPanel {
 	private final JButton quit;
 	private final JTextPane messageWindow;
 	private final Conversation conversation;
-	private final JColorChooser chooser;
+	private final JColorChooser colorChooser;
+	private final JFileChooser fileChooser;
 
 	private String title;
 
@@ -58,7 +64,28 @@ public class TabInterface extends JPanel {
 		reset = new JButton("Reset");
 		quit = new JButton("Disconnect");
 		quit.setActionCommand("disconnect");
-		chooser = new JColorChooser(Color.BLACK);
+		colorChooser = new JColorChooser(Color.BLACK);
+		
+		fileChooser = new JFileChooser();
+		final JTextField filePathField = new JTextField(10);
+		filePathField.setEditable(false);
+		JButton fileChooserButton = new JButton("Choose a file");
+		fileChooserButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+		        int returnVal = fileChooser.showOpenDialog(null);
+
+		        if (returnVal == JFileChooser.APPROVE_OPTION) {
+		        	conversation.setUserInput("file_path", fileChooser.getSelectedFile().getPath());
+		        	filePathField.setText(fileChooser.getSelectedFile().getPath());
+		        }
+			}
+			
+		});
+		JButton send = new JButton("Send");
+		send.setActionCommand("send_file");
+		
 		
 		JTextField userName = new JTextField(10);
 		userName.getDocument().addDocumentListener(conversation.getDocumentListener("user_name"));
@@ -68,15 +95,36 @@ public class TabInterface extends JPanel {
 		} catch (BadLocationException e1) {
 			e1.printStackTrace();
 		}
-		JLabel label = new JLabel("Message:");
-		label.setFont(new Font(label.getFont().getName(), Font.BOLD, 14));
+		JLabel msgInputLbl = new JLabel("Message:");
+		msgInputLbl.setFont(new Font(msgInputLbl.getFont().getName(), Font.BOLD, 14));
 		
-		JLabel nameLabel = new JLabel("Name:");
-		nameLabel.setFont(new Font(nameLabel.getFont().getName(), Font.BOLD, 14));
+		JLabel nameInputLbl = new JLabel("Name:");
+		nameInputLbl.setFont(new Font(nameInputLbl.getFont().getName(), Font.BOLD, 14));
 		
-		JScrollPane jScrollPane1 = new JScrollPane(messageInput);
+		JScrollPane msgInputPane = new JScrollPane(messageInput);
+		
 		JList<SocketThread> participantList = new JList<SocketThread>(conversation.getParticipants());
 		participantList.addListSelectionListener(conversation);
+		JScrollPane participantPane = new JScrollPane(participantList);
+		participantList.setVisibleRowCount(3);
+		
+		JComboBox<String> cryptoList = new JComboBox<String>(conversation.getSupportedAlgorithms());
+		cryptoList.addItemListener(new ItemListener() {
+
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				JComboBox<String> src = (JComboBox<String>) e.getSource();
+					
+				conversation.setUserInput("selected_crypto", (String) src.getSelectedItem());
+			}
+			
+		});
+		JButton setCryptoBtn = new JButton("Set crypto");
+		setCryptoBtn.setActionCommand("set_crypto");
+		JTextField keyRequestMsg = new JTextField(10);
+		keyRequestMsg.getDocument().addDocumentListener(conversation.getDocumentListener("key_request_msg"));
+		JButton requestKeyBtn = new JButton("Request key");
+		requestKeyBtn.setActionCommand("request_key");
 
 		messageInput.setLineWrap(true);
 		messageInput.setWrapStyleWord(true);
@@ -84,9 +132,15 @@ public class TabInterface extends JPanel {
 		messageInput.setRows(5);
 
 		JScrollPane window = new JScrollPane(messageWindow);
-		ColorPalette cp = new ColorPalette(chooser);
-		FontfaceButton bold = new FontfaceButton("B", "<fetstil>", "</fetstil>");
-		FontfaceButton italics = new FontfaceButton("I", "<kursiv>", "</kursiv>");
+		
+		ColorPalette cp = new ColorPalette(colorChooser);
+		ImageIcon b = new ImageIcon("text-bold-icon.png", "Bold");
+		ImageIcon i = new ImageIcon("text-italic-icon.png", "Italics");
+		FontfaceButton bold = new FontfaceButton(b, "<fetstil>", "</fetstil>");
+		FontfaceButton italics = new FontfaceButton(i, "<kursiv>", "</kursiv>");
+		
+		cp.add(bold);
+		cp.add(italics);
 
 		messageWindow.setPreferredSize(new Dimension(400, 300));
 		messageWindow.setEditable(false);
@@ -96,20 +150,23 @@ public class TabInterface extends JPanel {
 		
 		submit.addActionListener(conversation);
 		quit.addActionListener(conversation);
+		send.addActionListener(conversation);
+		setCryptoBtn.addActionListener(conversation);
+		requestKeyBtn.addActionListener(conversation);
 		reset.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				messageInput.setText(null);
-				chooser.setColor(Color.BLACK);
+				colorChooser.setColor(Color.BLACK);
 			}
 		});
 		
 		messageInput.getDocument().addDocumentListener(conversation.getDocumentListener("message_text"));
-		chooser.getSelectionModel().addChangeListener(new ChangeListener() {
+		colorChooser.getSelectionModel().addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				StringBuilder sb = new StringBuilder("#");
-				Color c = chooser.getColor();
+				Color c = colorChooser.getColor();
 				
 				if (c.getRed() < 16) sb.append('0');
 				sb.append(Integer.toHexString(c.getRed()));
@@ -124,8 +181,8 @@ public class TabInterface extends JPanel {
 			}
 		});
 
-		jScrollPane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
+		msgInputPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);	
+		
 		GroupLayout layout = new GroupLayout(this);
 		layout.setAutoCreateContainerGaps(true);
 		layout.setAutoCreateGaps(true);
@@ -134,35 +191,60 @@ public class TabInterface extends JPanel {
 		layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 				.addComponent(window)
 				.addGroup(layout.createSequentialGroup()
+						.addGroup(layout.createSequentialGroup()
+							.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+									.addComponent(nameInputLbl)
+									.addComponent(msgInputLbl)
+									.addComponent(cp, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE))
+							.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+									.addComponent(userName)
+									.addComponent(msgInputPane)
+									.addGroup(layout.createSequentialGroup()
+											.addComponent(submit)
+											.addComponent(reset)
+											.addComponent(quit))))
 						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-								.addComponent(nameLabel)
-								.addComponent(label)
-								.addComponent(cp))
-						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-								.addComponent(userName)
-								.addComponent(jScrollPane1)
+								.addComponent(participantPane)
 								.addGroup(layout.createSequentialGroup()
-										.addComponent(submit)
-										.addComponent(reset)
-										.addComponent(quit)))
-						.addComponent(participantList))
+										.addComponent(filePathField)
+										.addComponent(fileChooserButton)
+										.addComponent(send))
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(cryptoList)
+										.addComponent(setCryptoBtn))
+								.addGroup(layout.createSequentialGroup()
+										.addComponent(keyRequestMsg)
+										.addComponent(requestKeyBtn))))
 		);
 
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addComponent(window)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 						.addGroup(layout.createSequentialGroup()
-								.addComponent(nameLabel)
-								.addComponent(label)
-								.addComponent(cp))
+							.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+									.addComponent(nameInputLbl)
+									.addComponent(userName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+							.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+									.addGroup(layout.createSequentialGroup()
+											.addComponent(msgInputLbl)
+											.addComponent(cp))
+									.addComponent(msgInputPane))
+							.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+											.addComponent(submit)
+											.addComponent(reset)
+											.addComponent(quit)))
 						.addGroup(layout.createSequentialGroup()
-								.addComponent(userName)
-								.addComponent(jScrollPane1)
-								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-										.addComponent(submit)
-										.addComponent(reset)
-										.addComponent(quit)))
-						.addComponent(participantList))
+								.addComponent(participantPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+										.addComponent(filePathField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addComponent(fileChooserButton)
+										.addComponent(send))
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+										.addComponent(cryptoList, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addComponent(setCryptoBtn))
+								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+										.addComponent(keyRequestMsg, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+										.addComponent(requestKeyBtn))))
 				);
 	}
 
@@ -171,10 +253,17 @@ public class TabInterface extends JPanel {
 	}
 	
 	private class FontfaceButton extends JPanel {
-		public FontfaceButton(String text, final String tag, final String endTag) {
-			JLabel label = new JLabel(text);
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1699601872432702002L;
+
+		public FontfaceButton(ImageIcon icon, final String tag, final String endTag) {
+			
+			JLabel label = new JLabel(icon);
 			
 			add(label);
+	
 			addMouseListener(new MouseAdapter() {
 
 				@Override

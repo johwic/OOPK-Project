@@ -24,13 +24,15 @@ public class ColorPalette extends JPanel {
 	
 	public ColorPalette(JColorChooser cc) {
 		this.chooser = cc;
-		setLayout(new FlowLayout(FlowLayout.LEADING, 3, 3));
+		setLayout(new FlowLayout(FlowLayout.LEFT, 3, 3));
 		//setSize(50,30);
 		add(new ColorSwatch(Color.BLACK, false, true));
 		add(new ColorSwatch(Color.GRAY, false, false));
 		add(new ColorSwatch(Color.RED, false, false));
 		add(new ColorSwatch(Color.PINK, false, false));
 		add(new ColorSwatch(Color.YELLOW, false, false));
+		add(new ColorSwatch(Color.BLUE, false, false));
+		add(new ColorSwatch(Color.GREEN, false, false));
 		add(new ColorSwatch(Color.WHITE, true, false));
 	}
 	

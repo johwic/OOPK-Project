@@ -1,15 +1,9 @@
 package crypto;
 
 import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Random;
-
-import static javax.xml.bind.DatatypeConverter.parseHexBinary;
-import static javax.xml.bind.DatatypeConverter.printHexBinary;
 
 
 /**

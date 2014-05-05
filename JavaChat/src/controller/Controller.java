@@ -190,7 +190,9 @@ public class Controller implements ServerSocketListener, ActionListener, WindowL
 		for ( Conversation c : conv ) {
 			c.disconnectAll();
 		}
-		
+		if ( server != null ) {
+			server.terminate();
+		}
 		return;
 	}
 

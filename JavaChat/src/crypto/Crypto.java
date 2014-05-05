@@ -1,7 +1,6 @@
 package crypto;
 
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -9,17 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.EncodedKeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-
-import static javax.xml.bind.DatatypeConverter.parseHexBinary;
-import static javax.xml.bind.DatatypeConverter.printHexBinary;
 
 /**
  * Created by mh on 01/05/14.

@@ -26,6 +26,8 @@ public class SocketThread {
     // the socket
 	private Socket socket;
 	private String name = null;
+	private String algorithm = null;
+	private String lastKey = null;
 
     // separate threads for i/o
 	private final Thread reader;
@@ -33,11 +35,11 @@ public class SocketThread {
 
     // queue for messages to be sent
 	private volatile BlockingQueue<Message> msgQueue = new LinkedBlockingQueue<Message>();
+	private volatile BlockingQueue<Message> messages = new LinkedBlockingQueue<Message>();
 
 	private volatile XMLReader input;
 	private volatile XMLWriter output;
 	
-	private volatile BlockingQueue<Message> messages = new LinkedBlockingQueue<Message>();
 
 	public SocketThread(Socket skt) {
 
@@ -155,6 +157,10 @@ public class SocketThread {
 	}
 	
 	public synchronized void send(Message m) {
+		if ( algorithm != null ) {
+				m.setEncryptionAlgo(algorithm);
+				m.setEncryptionKey(lastKey);
+		}
 		this.msgQueue.add(m);
 	}
 	
@@ -184,6 +190,22 @@ public class SocketThread {
 		return name;
 	}
 	
+	public String getAlgorithm() {
+		return algorithm;
+	}
+
+	public void setAlgorithm(String algorithm) {
+		this.algorithm = algorithm;
+	}
+
+	public String getLastKey() {
+		return lastKey;
+	}
+
+	public void setLastKey(String lastKey) {
+		this.lastKey = lastKey;
+	}
+
 	@Override
 	public String toString() {
 		if ( name != null ) {
@@ -191,5 +213,9 @@ public class SocketThread {
 		} else {
 			return socket.getInetAddress().getCanonicalHostName();
 		}
+	}
+	
+	public String getIp() {
+		return socket.getInetAddress().getHostAddress();
 	}
 }

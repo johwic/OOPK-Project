@@ -2,9 +2,7 @@ package crypto;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.PrivateKey;
 import java.util.HashMap;
 
 import static javax.xml.bind.DatatypeConverter.parseHexBinary;

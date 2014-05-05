@@ -5,6 +5,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
 
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -13,6 +14,8 @@ import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
+
+import crypto.Crypto;
 
 /**
  * StAx implementation for XML parsing of messages.
@@ -29,62 +32,114 @@ public class XMLReader implements Closeable {
 	
 	private final BufferedReader in;
 	private final XMLInputFactory inputFactory;
+	private final Crypto crypto;
 	
 	private XMLEventReader reader;
 	private Message message;
 	
 	public XMLReader(BufferedReader in) throws XMLStreamException {
 		this.in = in;
+		this.crypto = new Crypto();
 		
 		inputFactory = XMLInputFactory.newInstance();
 		inputFactory.setProperty("javax.xml.stream.isCoalescing", true);
 	}
 
-	private void addAttribute(String tag, String attribute, String value) {
+	private void addAttribute(String tag, String attribute, String value, boolean decrypt, String type, String key) {
+		if (decrypt) {
+			value = crypto.decrypt(value, key, type);
+		}
+		
 		switch (tag) {
-		case MESSAGE:
-			switch (attribute) {
-			case SENDER:
-				message.setSender(value);
+			case MESSAGE:
+				switch (attribute) {
+				case SENDER:
+					message.setSender(value);
+					break;
+				}
 				break;
-			}
-			break;
-
-		case TEXT:
-			switch (attribute) {
-			case COLOR:
-				message.setColor(value);
+	
+			case TEXT:
+				switch (attribute) {
+				case COLOR:
+					message.setColor(value);
+					break;
+				}
 				break;
-			}
-			break;
+				
+			case REQUEST:
+				switch (attribute) {
+				case REPLY:
+					message.setRequestReply(value);
+					break;
+				}
+				break;
+				
+			case "filerequest":
+				switch (attribute) {
+				case "size":
+					message.setFileSize(Integer.parseInt(value));
+					break;
+				case "name":
+					message.setFileName(value);
+					break;
+				}
+				break;
 			
-		case REQUEST:
-			switch (attribute) {
-			case REPLY:
-				message.setRequestReply(value);
+			case "fileresponse":
+				switch (attribute) {
+				case "port":
+					message.setFilePort(Integer.parseInt(value));
+					break;
+				case "reply":
+					message.setFileResponse(value);
+					break;
+				}
 				break;
-			}
-			break;
-		}		
+				
+			case "keyrequest":
+				switch (attribute) {
+				case "type":
+					message.setKeyRequestType(value);
+					break;
+				}
+				break;				
+		}
 	}
 
-	private void addTag(String tag, String value) {
+	private void addTag(String tag, String value, boolean decrypt, String type, String key) {
+		if (decrypt) {
+			value = crypto.decrypt(value, key, type);
+		}
+		
 		switch (tag) {
-		case MESSAGE:
-			break;
+			case MESSAGE:
+				break;
 
-		case TEXT:
-			message.setText(value);
-			break;
+			case TEXT:
+				message.setText(value);
+				break;
 
-		case DISCONNECT:
-			message.setDisconnect(true);
-			break;
-			
-		case REQUEST:
-			message.setRequestMessage(value);
-			break;
-		}	
+			case DISCONNECT:
+				message.setDisconnect(true);
+				break;
+				
+			case REQUEST:
+				message.setRequestMessage(value);
+				break;
+				
+			case "filerequest":
+				message.setFileMessage(value);
+				break;
+				
+			case "fileresponse":
+				message.setFileResponseMessage(value);
+				break;
+				
+			case "keyrequest":
+				message.setKeyRequest(value);
+				break;
+		}
 	}
 
 	public Message readMessage() throws XMLStreamException {
@@ -92,29 +147,58 @@ public class XMLReader implements Closeable {
 		reader = inputFactory.createXMLEventReader(this.in);
 		message = new Message();
 		
+		boolean decrypt = false;
+		String type = null;
+		String key = null;
+		
 		while (reader.hasNext()) {
 			XMLEvent event = reader.nextEvent();
+			System.out.println(event.toString());
 			
 			switch (event.getEventType()) {
 				case XMLStreamConstants.START_ELEMENT:
 					StartElement elem = event.asStartElement();
 					if (elem.getName().getLocalPart().equals(MESSAGE)) {
 						message = new Message();
+						addAttribute(MESSAGE, "sender", elem.getAttributeByName(new QName("sender")).getValue(), false, null, null);
+					} else if (elem.getName().getLocalPart().equals("encrypted")) {
+						decrypt = true;
+						type = elem.getAttributeByName(new QName("type")).getValue();
+						key = elem.getAttributeByName(new QName("key")).getValue();
+						message.setEncryptionAlgo(type);
+						message.setEncryptionKey(key);
+					} else {
+						Iterator<?> attributes = elem.getAttributes();
+						while (attributes.hasNext()) {
+							Attribute attribute = (Attribute) attributes.next();
+							addAttribute(elem.getName().getLocalPart(), attribute.getName().getLocalPart(), attribute.getValue(), decrypt, type, key);
+						}
+						if (elem.getName().getLocalPart().equals(TEXT)) {
+							event = reader.nextEvent();
+							System.out.println(event.toString());
+							addTag(TEXT, event.asCharacters().getData(), decrypt, type, key);
+						}
+						if (elem.getName().getLocalPart().equals(REQUEST)) {
+							event = reader.nextEvent();
+							System.out.println(event.toString());
+							addTag(REQUEST, event.asCharacters().getData(), decrypt, type, key);
+						}
+						if (elem.getName().getLocalPart().equals("filerequest")) {
+							event = reader.nextEvent();
+							System.out.println(event.toString());
+							addTag("filerequest", event.asCharacters().getData(), decrypt, type, key);
+						}
+						if (elem.getName().getLocalPart().equals("fileresponse")) {
+							event = reader.nextEvent();
+							System.out.println(event.toString());
+							addTag("fileresponse", event.asCharacters().getData(), decrypt, type, key);
+						}
+						if (elem.getName().getLocalPart().equals("keyrequest")) {
+							event = reader.nextEvent();
+							System.out.println(event.toString());
+							addTag("keyrequest", event.asCharacters().getData(), decrypt, type, key);
+						}						
 					}
-	
-					Iterator<?> attributes = elem.getAttributes();
-					while (attributes.hasNext()) {
-						Attribute attribute = (Attribute) attributes.next();
-						addAttribute(elem.getName().getLocalPart(), attribute.getName().getLocalPart(), attribute.getValue());
-					}
-					if (elem.getName().getLocalPart().equals(TEXT)) {
-						event = reader.nextEvent();
-						addTag(TEXT, event.asCharacters().getData());
-					}
-					if (elem.getName().getLocalPart().equals(REQUEST)) {
-						event = reader.nextEvent();
-						addTag(REQUEST, event.asCharacters().getData());
-					}					
 					break;
 	
 					//case XMLStreamConstants.CHARACTERS:
@@ -128,6 +212,8 @@ public class XMLReader implements Closeable {
 						return message;
 					} else if ( elem1.getName().getLocalPart().equals(DISCONNECT) ) {
 						message.setDisconnect(true);
+					} else if ( elem1.getName().getLocalPart().equals("encrypted")) {
+						decrypt = false;
 					}
 					//addTag(elem1.getName().getLocalPart(), tagContent);
 					break;
@@ -140,10 +226,12 @@ public class XMLReader implements Closeable {
 
 	@Override
 	public void close() throws IOException {
-		try {
-			reader.close();
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
+		if (reader != null) {
+			try {
+				reader.close();
+			} catch (XMLStreamException e) {
+				e.printStackTrace();
+			}
 		}
 		in.close();
 	}
