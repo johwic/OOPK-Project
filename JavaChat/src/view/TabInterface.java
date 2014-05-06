@@ -68,6 +68,9 @@ public class TabInterface extends JPanel {
 		
 		fileChooser = new JFileChooser();
 		final JTextField filePathField = new JTextField(10);
+		JTextField fileMsgField = new JTextField(10);
+		fileMsgField.getDocument().addDocumentListener(conversation.getDocumentListener("file_transfer_msg"));
+		
 		filePathField.setEditable(false);
 		JButton fileChooserButton = new JButton("Choose a file");
 		fileChooserButton.addActionListener(new ActionListener() {
@@ -206,6 +209,7 @@ public class TabInterface extends JPanel {
 						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 								.addComponent(participantPane)
 								.addGroup(layout.createSequentialGroup()
+										.addComponent(fileMsgField)
 										.addComponent(filePathField)
 										.addComponent(fileChooserButton)
 										.addComponent(send))
@@ -236,6 +240,7 @@ public class TabInterface extends JPanel {
 						.addGroup(layout.createSequentialGroup()
 								.addComponent(participantPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
 								.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+										.addComponent(fileMsgField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
 										.addComponent(filePathField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
 										.addComponent(fileChooserButton)
 										.addComponent(send))

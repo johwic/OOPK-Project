@@ -1,5 +1,6 @@
 package model;
 
+import java.awt.Dimension;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -19,7 +20,10 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.ProgressMonitorInputStream;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
@@ -60,7 +64,6 @@ public class FileHandler {
 			Message response = null;
 			try {
 				response = responseQueue.poll(1, TimeUnit.MINUTES);
-				System.out.println("Here");
 			} catch (InterruptedException e) {
 				return;
 			}
@@ -76,11 +79,21 @@ public class FileHandler {
 					progressbar.setValue(0);
 					progressbar.setStringPainted(true);
 					
+					final JTextArea statusPane = new JTextArea(5, 20);
+					JScrollPane scrollPane = new JScrollPane(statusPane); 
+					statusPane.setEditable(false);
+					statusPane.append(response.getSender() + " accepted the file. \nMessage: " + response.getFileResponseMessage() + "\n");
+					
 					pane.add(progressbar);
+					pane.add(scrollPane);
 					
 					dialog.add(pane);
+					dialog.setAlwaysOnTop(true);
+					dialog.setLocationRelativeTo(null);
+					dialog.setPreferredSize(new Dimension(300, 100));
+					dialog.setMinimumSize(new Dimension(300, 100));
 					dialog.setVisible(true);
-					
+					statusPane.append("Opening socket on address " + ip + ":" + response.getFilePort() + "\n");
 					
 					
 					Socket skt;
@@ -94,6 +107,7 @@ public class FileHandler {
 	
 						int data;
 						int i = 0;
+						statusPane.append("Transferring file...\n");
 						while ((data = input.read()) != -1) {
 							output.write(data);
 							i++;
@@ -111,10 +125,15 @@ public class FileHandler {
 						output.close();
 						input.close();
 						skt.close();
+						statusPane.append("Done. All streams closed");
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
+				} else {
+					JOptionPane.showMessageDialog(null, response.getSender() + " did not accept the file.\nReason: " + response.getFileResponseMessage(), "File request rejected", 	JOptionPane.INFORMATION_MESSAGE);
 				}
+			} else {
+				JOptionPane.showMessageDialog(null, "File request timed out", "File request rejected", 	JOptionPane.INFORMATION_MESSAGE);	
 			}
 		}
 
@@ -143,16 +162,23 @@ public class FileHandler {
 				JDialog dialog = new JDialog((JFrame) null, "File transfer request", false);
 				
 				JPanel pane = new JPanel();
-				
-				
-				JLabel portLabel = new JLabel("Port: ");
 				final JProgressBar progressbar = new JProgressBar(0, message.getFileSize());
 				progressbar.setValue(0);
 				progressbar.setStringPainted(true);
 				
-				pane.add(progressbar);
+				final JTextArea statusPane = new JTextArea(5, 20);
+				JScrollPane scrollPane = new JScrollPane(statusPane); 
+				statusPane.setEditable(false);
+				statusPane.append("Transferring file..");				
 				
+				pane.add(progressbar);
+				pane.add(scrollPane);
+								
 				dialog.add(pane);
+				dialog.setAlwaysOnTop(true);
+				dialog.setLocationRelativeTo(null);
+				dialog.setPreferredSize(new Dimension(300, 100));
+				dialog.setMinimumSize(new Dimension(300, 100));
 				dialog.setVisible(true);
 				
 				Message m = new Message();
@@ -183,12 +209,13 @@ public class FileHandler {
 							}
 						});
 					}
-					
+					statusPane.append("Done.\nWriting to " + message.getFileName());
 					output.flush();
 					output.close();
 					input.close();
 					skt.close();
 					serverSkt.close();
+					statusPane.append("Done. All streams closed.");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -196,7 +223,9 @@ public class FileHandler {
 				Message m = new Message();
 				m.setSender("Johan");
 				m.setFileResponse("no");
-				m.setFileResponseMessage(fileMsg);			
+				m.setFileResponseMessage(fileMsg);
+				
+				socket.send(m);
 			}
 		}
 

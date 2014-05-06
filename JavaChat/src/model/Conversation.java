@@ -292,7 +292,7 @@ public class Conversation implements ActionListener, ListSelectionListener, Sock
 						m.setSender(userInput.get("user_name"));
 						m.setFileName(file.getName());
 						m.setFileSize((int) file.length());
-						m.setFileMessage("Test");
+						m.setFileMessage(userInput.get("file_transfer_msg"));
 						
 						for ( SocketThread skt : selectedParticipants ) {
 							skt.send(m);
