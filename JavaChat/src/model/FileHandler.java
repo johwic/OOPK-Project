@@ -12,7 +12,17 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JTextField;
 import javax.swing.ProgressMonitorInputStream;
+import javax.swing.SwingUtilities;
+import javax.swing.text.BadLocationException;
 
 import view.FileWindow;
 
@@ -30,7 +40,7 @@ public class FileHandler {
 	}
 	
 	public void addRequest(Message m, SocketThread skt) {
-		FileWindow.createFileResponseWindow(this, m);
+		//FileWindow.createFileResponseWindow(this, m);
 		Thread t = new Thread(new Receiver(m, skt));
 		t.start();
 	}
@@ -57,6 +67,22 @@ public class FileHandler {
 			
 			if ( response != null ) {
 				if ( response.getFileResponse().equals("yes") ) {
+					JDialog dialog = new JDialog((JFrame) null, "File transfer request", false);
+					
+					JPanel pane = new JPanel();
+					
+					
+					final JProgressBar progressbar = new JProgressBar(0, (int) file.length());
+					progressbar.setValue(0);
+					progressbar.setStringPainted(true);
+					
+					pane.add(progressbar);
+					
+					dialog.add(pane);
+					dialog.setVisible(true);
+					
+					
+					
 					Socket skt;
 					BufferedOutputStream output;
 					BufferedInputStream input;
@@ -67,11 +93,21 @@ public class FileHandler {
 						input = new BufferedInputStream(new FileInputStream(this.file));
 	
 						int data;
+						int i = 0;
 						while ((data = input.read()) != -1) {
 							output.write(data);
+							i++;
+							final int p = i;
+							SwingUtilities.invokeLater(new Runnable() {
+								@Override
+								public void run() {
+									progressbar.setValue(p);
+								}
+							});
+							output.flush();
 						}
 						
-						output.flush();
+						
 						output.close();
 						input.close();
 						skt.close();
@@ -96,30 +132,56 @@ public class FileHandler {
 		
 		@Override
 		public void run() {
-			//Open window
+			String msg = message.getSender() + " wish to send you a file.\nFile name: " + message.getFileName() + "\nFile size: " + (double) message.getFileSize() / (double) 1024 + " KB\nMessage: " + message.getFileMessage() + "\nDo you wish to receive it?";
+			int choice = JOptionPane.showOptionDialog(null, msg, "File request received", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+			String fileMsg = JOptionPane.showInputDialog(null, "Please enter a message:", "Enter a message", JOptionPane.PLAIN_MESSAGE);
 			
-			//get user input
-			
-			Message m = new Message();
-			m.setSender("Johan");
-			m.setFileResponse("yes");
-			m.setFileResponseMessage("d2");
-			m.setFilePort(10101);
-			
-			// send message
-			socket.send(m);
-			// if yes
-			if ( m.getFileResponse().equals("yes") ) {
+			if ( choice == JOptionPane.YES_OPTION ) {
+				String portStr = JOptionPane.showInputDialog(null, "Please enter a port:", "Enter a port", JOptionPane.PLAIN_MESSAGE);
+				int port = Integer.parseInt(portStr);
+				
+				JDialog dialog = new JDialog((JFrame) null, "File transfer request", false);
+				
+				JPanel pane = new JPanel();
+				
+				
+				JLabel portLabel = new JLabel("Port: ");
+				final JProgressBar progressbar = new JProgressBar(0, message.getFileSize());
+				progressbar.setValue(0);
+				progressbar.setStringPainted(true);
+				
+				pane.add(progressbar);
+				
+				dialog.add(pane);
+				dialog.setVisible(true);
+				
+				Message m = new Message();
+				m.setSender("Johan");
+				m.setFileResponse("yes");
+				m.setFileResponseMessage(fileMsg);
+				m.setFilePort(port);
+				
+				// send message
+				socket.send(m);
 				try {
-					ServerSocket serverSkt = new ServerSocket(10101);
+					ServerSocket serverSkt = new ServerSocket(port);
 					Socket skt = serverSkt.accept();
 					
 					BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(message.getFileName()));
-					BufferedInputStream input = new BufferedInputStream(new ProgressMonitorInputStream(null, "Transfering file", skt.getInputStream()));
+					BufferedInputStream input = new BufferedInputStream(skt.getInputStream());
 					
 					int data;
+					int i = 0;
 					while ( (data = input.read()) != -1) {
 						output.write(data);
+						i++;
+						final int p = i;
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								progressbar.setValue(p);
+							}
+						});
 					}
 					
 					output.flush();
@@ -128,9 +190,13 @@ public class FileHandler {
 					skt.close();
 					serverSkt.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			} else {
+				Message m = new Message();
+				m.setSender("Johan");
+				m.setFileResponse("no");
+				m.setFileResponseMessage(fileMsg);			
 			}
 		}
 
